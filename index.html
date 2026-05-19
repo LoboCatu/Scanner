@@ -38,6 +38,11 @@ button{
     font-size:16px;
     background:#1e88e5;
     color:white;
+    cursor:pointer;
+}
+
+button:active{
+    background:#1565c0;
 }
 
 .result{
@@ -65,155 +70,130 @@ Resultado: -
 </div>
 
 <script>
-
-
-function onScanSuccess(decodedText){
-
-    if(decodedText === lastResult) return;
-
-    lastResult = decodedText;
-
-    document.getElementById("output").innerText =
-      "Resultado: " + decodedText;
-
-    fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
-
-        method:"POST",
-
-        body: JSON.stringify({
-            codigo: decodedText
-        })
-    });
-
-}
-
 let scanner;
 let scanning = false;
 let lastResult = "";
 
+// Unificamos el éxito en una sola función organizada
+function onScanSuccess(decodedText){
+    if(!decodedText) return;
+
+    // Filtro anti duplicados
+    if(decodedText === lastResult) return;
+
+    // Filtro anti basura (Letras, números y guiones entre 4 y 40 caracteres)
+    if(!/^[A-Z0-9\-]{4,40}$/i.test(decodedText)) return;
+
+    lastResult = decodedText;
+
+    // Actualizar interfaz
+    document.getElementById("output").innerText = "Resultado: " + decodedText;
+
+    // Feedback visual y táctil (Vibración)
+    if(navigator.vibrate){
+        navigator.vibrate(120);
+    }
+
+    // Audio de confirmación rápido (Beep nativo generado por el navegador)
+    playBeep();
+
+    console.log("Código detectado:", decodedText);
+
+    // Enviar datos a Google Apps Script
+    fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
+        method: "POST",
+        mode: "no-cors", // Recomendado para evitar problemas de CORS con Google Apps Script
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            codigo: decodedText
+        })
+    })
+    .then(() => console.log("Enviado con éxito"))
+    .catch(err => console.error("Error al enviar:", err));
+}
+
+function onScanFailure(error){
+    // Silencioso para evitar saturar la consola del navegador
+}
+
+// Generador de Beep nativo (no depende de un archivo .mp3/.ogg externo)
+function playBeep() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // Tono del beep
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volumen
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1); // Duración: 100ms
+    } catch (e) {
+        console.log("No se pudo reproducir el audio de forma nativa", e);
+    }
+}
+
 async function startScanner(){
-
     if(scanning) return;
-
     scanning = true;
 
-    document.getElementById("output").innerText =
-      "Iniciando cámara...";
-
+    document.getElementById("output").innerText = "Iniciando cámara...";
     scanner = new Html5Qrcode("reader");
 
     const config = {
-
         fps: 20,
-
         qrbox: {
             width: 280,
             height: 120
         },
-
         aspectRatio: 1.777,
-
         disableFlip: true,
-
         formatsToSupport: [
             Html5QrcodeSupportedFormats.CODE_128
         ],
-
         experimentalFeatures: {
             useBarCodeDetectorIfSupported: true
         }
     };
 
     try{
-
+        // Cambiado de 'exact: "environment"' a 'facingMode: "environment"' para mayor compatibilidad
         await scanner.start(
-            {
-                facingMode: {
-                    exact: "environment"
-                }
-            },
-
+            { facingMode: "environment" },
             config,
-
             onScanSuccess,
-
             onScanFailure
         );
 
-        document.getElementById("output").innerText =
-          "Scanner activo";
-
+        document.getElementById("output").innerText = "Scanner activo";
     }catch(err){
-
         console.log(err);
-
-        document.getElementById("output").innerText =
-          "Error cámara: " + err;
+        scanning = false;
+        document.getElementById("output").innerText = "Error cámara: " + err;
     }
 }
 
 function stopScanner(){
-
-    if(scanner){
-
+    if(scanner && scanning){
         scanner.stop()
         .then(()=>{
-
             scanner.clear();
-
             scanning = false;
-
-            document.getElementById("output").innerText =
-              "Scanner detenido";
+            lastResult = ""; // Limpiamos el último resultado para poder volver a escanearlo si se reinicia
+            document.getElementById("output").innerText = "Scanner detenido";
         })
         .catch(err=>{
             console.log(err);
         });
     }
 }
-
-function onScanSuccess(decodedText){
-
-    if(!decodedText) return;
-
-    // anti duplicado
-    if(decodedText === lastResult) return;
-
-    // filtro anti basura
-    if(!/^[A-Z0-9\-]{4,40}$/i.test(decodedText))
-        return;
-
-    lastResult = decodedText;
-
-    document.getElementById("output").innerText =
-      "Resultado: " + decodedText;
-
-    // vibración
-    if(navigator.vibrate){
-        navigator.vibrate(120);
-    }
-
-    // beep
-    try{
-        const audio = new Audio(
-          "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
-        );
-
-        audio.play();
-    }catch(e){}
-
-    console.log("OK:", decodedText);
-}
-
-function onScanFailure(error){
-    // silencioso
-}
-
 </script>
 
 </body>
 </html>
-
-
-
-
