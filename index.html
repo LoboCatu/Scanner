@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Scanner Code128 PRO</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body{
+    margin:0;
+    background:#0b2a4a;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+
+h1{
+    font-size:20px;
+    margin:15px;
+}
+
+#reader{
+    width:100%;
+    max-width:450px;
+    margin:auto;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+button{
+    padding:12px 18px;
+    margin:10px 5px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    background:#1e88e5;
+    color:white;
+}
+
+.result{
+    margin:15px;
+    padding:12px;
+    background:#123a63;
+    border-radius:8px;
+    font-size:18px;
+    word-break:break-all;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Scanner PRO Code128</h1>
+
+<div id="reader"></div>
+
+<button onclick="startScanner()">📷 Iniciar</button>
+<button onclick="stopScanner()">⛔ Stop</button>
+
+<div class="result" id="output">
+Resultado: -
+</div>
+
+<script>
+
+
+function onScanSuccess(decodedText){
+
+    if(decodedText === lastResult) return;
+
+    lastResult = decodedText;
+
+    document.getElementById("output").innerText =
+      "Resultado: " + decodedText;
+
+    fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
+
+        method:"POST",
+
+        body: JSON.stringify({
+            codigo: decodedText
+        })
+    });
+
+}
+
+let scanner;
+let scanning = false;
+let lastResult = "";
+
+async function startScanner(){
+
+    if(scanning) return;
+
+    scanning = true;
+
+    document.getElementById("output").innerText =
+      "Iniciando cámara...";
+
+    scanner = new Html5Qrcode("reader");
+
+    const config = {
+
+        fps: 20,
+
+        qrbox: {
+            width: 280,
+            height: 120
+        },
+
+        aspectRatio: 1.777,
+
+        disableFlip: true,
+
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.CODE_128
+        ],
+
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+        }
+    };
+
+    try{
+
+        await scanner.start(
+            {
+                facingMode: {
+                    exact: "environment"
+                }
+            },
+
+            config,
+
+            onScanSuccess,
+
+            onScanFailure
+        );
+
+        document.getElementById("output").innerText =
+          "Scanner activo";
+
+    }catch(err){
+
+        console.log(err);
+
+        document.getElementById("output").innerText =
+          "Error cámara: " + err;
+    }
+}
+
+function stopScanner(){
+
+    if(scanner){
+
+        scanner.stop()
+        .then(()=>{
+
+            scanner.clear();
+
+            scanning = false;
+
+            document.getElementById("output").innerText =
+              "Scanner detenido";
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+}
+
+function onScanSuccess(decodedText){
+
+    if(!decodedText) return;
+
+    // anti duplicado
+    if(decodedText === lastResult) return;
+
+    // filtro anti basura
+    if(!/^[A-Z0-9\-]{4,40}$/i.test(decodedText))
+        return;
+
+    lastResult = decodedText;
+
+    document.getElementById("output").innerText =
+      "Resultado: " + decodedText;
+
+    // vibración
+    if(navigator.vibrate){
+        navigator.vibrate(120);
+    }
+
+    // beep
+    try{
+        const audio = new Audio(
+          "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
+        );
+
+        audio.play();
+    }catch(e){}
+
+    console.log("OK:", decodedText);
+}
+
+function onScanFailure(error){
+    // silencioso
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
