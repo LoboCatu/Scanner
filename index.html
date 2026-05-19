@@ -47,11 +47,19 @@ button:active{
 
 .result{
     margin:15px;
-    padding:12px;
+    padding:15px;
     background:#123a63;
+    border: 2px solid #1e88e5;
     border-radius:8px;
-    font-size:18px;
+    font-size:20px;
+    font-weight: bold;
     word-break:break-all;
+    transition: background 0.2s ease;
+}
+
+/* Efecto visual rápido cuando escanea con éxito */
+.flash-success {
+    background: #1b5e20 !important;
 }
 </style>
 </head>
@@ -70,11 +78,18 @@ Resultado: -
 </div>
 
 <script>
-let scanner;
+let scanner = null;
 let scanning = false;
 let lastResult = "";
+let audioCtx = null; // Guardamos el contexto de audio globalmente
 
-// Unificamos el éxito en una sola función organizada
+// Inicializa el audio con el primer toque del usuario para saltar el bloqueo del navegador
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
 function onScanSuccess(decodedText){
     if(!decodedText) return;
 
@@ -86,15 +101,20 @@ function onScanSuccess(decodedText){
 
     lastResult = decodedText;
 
-    // Actualizar interfaz
-    document.getElementById("output").innerText = "Resultado: " + decodedText;
+    // MOSTRAR EN PANTALLA: Actualizar el contenedor con el código detectado
+    const outputDiv = document.getElementById("output");
+    outputDiv.innerText = "Código: " + decodedText;
+    
+    // Efecto visual: parpadeo verde en el cuadro de texto
+    outputDiv.classList.add("flash-success");
+    setTimeout(() => outputDiv.classList.remove("flash-success"), 300);
 
-    // Feedback visual y táctil (Vibración)
+    // Feedback táctil (Vibración de 120 milisegundos)
     if(navigator.vibrate){
         navigator.vibrate(120);
     }
 
-    // Audio de confirmación rápido (Beep nativo generado por el navegador)
+    // HACER BIP: Sonido electrónico instantáneo
     playBeep();
 
     console.log("Código detectado:", decodedText);
@@ -102,7 +122,7 @@ function onScanSuccess(decodedText){
     // Enviar datos a Google Apps Script
     fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
         method: "POST",
-        mode: "no-cors", // Recomendado para evitar problemas de CORS con Google Apps Script
+        mode: "no-cors", 
         headers: {
             "Content-Type": "application/json"
         },
@@ -115,67 +135,97 @@ function onScanSuccess(decodedText){
 }
 
 function onScanFailure(error){
-    // Silencioso para evitar saturar la consola del navegador
+    // Silencioso
 }
 
-// Generador de Beep nativo (no depende de un archivo .mp3/.ogg externo)
+// Función optimizada para el BIP electrónico (agudo y corto, estilo caja de supermercado)
 function playBeep() {
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        initAudio();
+        
+        // Si el navegador había pausado el audio por inactividad, lo reactivamos
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
 
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // Tono del beep
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volumen
+        oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // 1000Hz es un tono agudo y limpio
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); // Volumen intermedio
 
         oscillator.connect(gainNode);
         gainNode.connect(audioCtx.destination);
 
         oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.1); // Duración: 100ms
+        oscillator.stop(audioCtx.currentTime + 0.08); // Duración de 80 milisegundos (un bip rápido)
     } catch (e) {
-        console.log("No se pudo reproducir el audio de forma nativa", e);
+        console.log("Error al reproducir el bip:", e);
     }
 }
 
 async function startScanner(){
     if(scanning) return;
-    scanning = true;
+    
+    // Activamos el motor de audio justo cuando el usuario presiona "Iniciar"
+    initAudio();
+    
+    document.getElementById("output").innerText = "Solicitando permisos de cámara...";
 
-    document.getElementById("output").innerText = "Iniciando cámara...";
-    scanner = new Html5Qrcode("reader");
-
-    const config = {
-        fps: 20,
-        qrbox: {
-            width: 280,
-            height: 120
-        },
-        aspectRatio: 1.777,
-        disableFlip: true,
-        formatsToSupport: [
-            Html5QrcodeSupportedFormats.CODE_128
-        ],
-        experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        
+        if (!devices || devices.length === 0) {
+            document.getElementById("output").innerText = "No se encontraron cámaras.";
+            return;
         }
-    };
 
-    try{
-        // Cambiado de 'exact: "environment"' a 'facingMode: "environment"' para mayor compatibilidad
+        let cameraId = devices[0].id;
+        for (let device of devices) {
+            const label = device.label.toLowerCase();
+            if (label.includes("back") || label.includes("trasera") || label.includes("environment") || label.includes("0, back")) {
+                cameraId = device.id;
+                break;
+            }
+        }
+
+        if (!scanner) {
+            scanner = new Html5Qrcode("reader");
+        }
+
+        scanning = true;
+        document.getElementById("output").innerText = "Iniciando cámara...";
+
+        const config = {
+            fps: 20,
+            qrbox: {
+                width: 280,
+                height: 120
+            },
+            aspectRatio: 1.777,
+            disableFlip: true,
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.CODE_128
+            ],
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
+        };
+
         await scanner.start(
-            { facingMode: "environment" },
+            cameraId,
             config,
             onScanSuccess,
             onScanFailure
         );
 
-        document.getElementById("output").innerText = "Scanner activo";
-    }catch(err){
-        console.log(err);
+        document.getElementById("output").innerText = "Scanner listo. Apunte a un código 128.";
+
+    } catch (err) {
+        console.error(err);
         scanning = false;
-        document.getElementById("output").innerText = "Error cámara: " + err;
+        document.getElementById("output").innerText = "Error al iniciar: " + err;
     }
 }
 
@@ -183,13 +233,12 @@ function stopScanner(){
     if(scanner && scanning){
         scanner.stop()
         .then(()=>{
-            scanner.clear();
             scanning = false;
-            lastResult = ""; // Limpiamos el último resultado para poder volver a escanearlo si se reinicia
+            lastResult = ""; 
             document.getElementById("output").innerText = "Scanner detenido";
         })
         .catch(err=>{
-            console.log(err);
+            console.log("Error al detener:", err);
         });
     }
 }
