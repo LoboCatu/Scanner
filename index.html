@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Scanner Code128 PRO</title>
+<title>Scanner DNI Argentina</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -51,13 +51,12 @@ button:active{
     background:#123a63;
     border: 2px solid #1e88e5;
     border-radius:8px;
-    font-size:20px;
+    font-size:16px;
     font-weight: bold;
-    word-break:break-all;
+    word-break: break-all;
     transition: background 0.2s ease;
 }
 
-/* Efecto visual rápido cuando escanea con éxito */
 .flash-success {
     background: #1b5e20 !important;
 }
@@ -66,7 +65,7 @@ button:active{
 
 <body>
 
-<h1>Scanner PRO Code128</h1>
+<h1>Scanner DNI Argentina</h1>
 
 <div id="reader"></div>
 
@@ -81,9 +80,8 @@ Resultado: -
 let scanner = null;
 let scanning = false;
 let lastResult = "";
-let audioCtx = null; // Guardamos el contexto de audio globalmente
+let audioCtx = null;
 
-// Inicializa el audio con el primer toque del usuario para saltar el bloqueo del navegador
 function initAudio() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -91,154 +89,93 @@ function initAudio() {
 }
 
 function onScanSuccess(decodedText){
-    if(!decodedText) return;
-
-    // Filtro anti duplicados
-    if(decodedText === lastResult) return;
-
-    // Filtro anti basura (Letras, números y guiones entre 4 y 40 caracteres)
-    if(!/^[A-Z0-9\-]{4,40}$/i.test(decodedText)) return;
+    if(!decodedText || decodedText === lastResult) return;
 
     lastResult = decodedText;
 
-    // MOSTRAR EN PANTALLA: Actualizar el contenedor con el código detectado
     const outputDiv = document.getElementById("output");
-    outputDiv.innerText = "Código: " + decodedText;
+    outputDiv.innerText = "Datos: " + decodedText;
     
-    // Efecto visual: parpadeo verde en el cuadro de texto
     outputDiv.classList.add("flash-success");
     setTimeout(() => outputDiv.classList.remove("flash-success"), 300);
 
-    // Feedback táctil (Vibración de 120 milisegundos)
-    if(navigator.vibrate){
-        navigator.vibrate(120);
-    }
-
-    // HACER BIP: Sonido electrónico instantáneo
+    if(navigator.vibrate) navigator.vibrate(120);
     playBeep();
 
-    console.log("Código detectado:", decodedText);
-
-    // Enviar datos a Google Apps Script
     fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
         method: "POST",
         mode: "no-cors", 
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            codigo: decodedText
-        })
-    })
-    .then(() => console.log("Enviado con éxito"))
-    .catch(err => console.error("Error al enviar:", err));
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codigo: decodedText })
+    }).catch(err => console.error(err));
 }
 
-function onScanFailure(error){
-    // Silencioso
-}
+function onScanFailure(error){}
 
-// Función optimizada para el BIP electrónico (agudo y corto, estilo caja de supermercado)
 function playBeep() {
     try {
         initAudio();
-        
-        // Si el navegador había pausado el audio por inactividad, lo reactivamos
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // 1000Hz es un tono agudo y limpio
-        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); // Volumen intermedio
-
+        oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
         oscillator.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-
         oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.08); // Duración de 80 milisegundos (un bip rápido)
-    } catch (e) {
-        console.log("Error al reproducir el bip:", e);
-    }
+        oscillator.stop(audioCtx.currentTime + 0.08);
+    } catch (e) {}
 }
 
 async function startScanner(){
     if(scanning) return;
-    
-    // Activamos el motor de audio justo cuando el usuario presiona "Iniciar"
     initAudio();
     
-    document.getElementById("output").innerText = "Solicitando permisos de cámara...";
+    document.getElementById("output").innerText = "Iniciando...";
 
     try {
         const devices = await Html5Qrcode.getCameras();
-        
-        if (!devices || devices.length === 0) {
-            document.getElementById("output").innerText = "No se encontraron cámaras.";
-            return;
-        }
+        if (!devices || devices.length === 0) return;
 
         let cameraId = devices[0].id;
         for (let device of devices) {
-            const label = device.label.toLowerCase();
-            if (label.includes("back") || label.includes("trasera") || label.includes("environment") || label.includes("0, back")) {
+            if (device.label.toLowerCase().includes("back")) {
                 cameraId = device.id;
                 break;
             }
         }
 
-        if (!scanner) {
-            scanner = new Html5Qrcode("reader");
-        }
+        if (!scanner) scanner = new Html5Qrcode("reader");
 
         scanning = true;
-        document.getElementById("output").innerText = "Iniciando cámara...";
 
+        // CONFIGURACIÓN PARA PDF417 (DNI)
         const config = {
-            fps: 20,
-            qrbox: {
-                width: 280,
-                height: 120
-            },
+            fps: 15,
+            qrbox: { width: 300, height: 200 },
             aspectRatio: 1.777,
-            disableFlip: true,
             formatsToSupport: [
+                Html5QrcodeSupportedFormats.PDF_417,
                 Html5QrcodeSupportedFormats.CODE_128
-            ],
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
-            }
+            ]
         };
 
-        await scanner.start(
-            cameraId,
-            config,
-            onScanSuccess,
-            onScanFailure
-        );
-
-        document.getElementById("output").innerText = "Scanner listo. Apunte a un código 128.";
+        await scanner.start(cameraId, config, onScanSuccess, onScanFailure);
+        document.getElementById("output").innerText = "Apunte al código del DNI...";
 
     } catch (err) {
-        console.error(err);
         scanning = false;
-        document.getElementById("output").innerText = "Error al iniciar: " + err;
+        document.getElementById("output").innerText = "Error: " + err;
     }
 }
 
 function stopScanner(){
     if(scanner && scanning){
-        scanner.stop()
-        .then(()=>{
+        scanner.stop().then(()=>{
             scanning = false;
             lastResult = ""; 
             document.getElementById("output").innerText = "Scanner detenido";
-        })
-        .catch(err=>{
-            console.log("Error al detener:", err);
         });
     }
 }
