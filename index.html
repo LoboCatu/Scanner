@@ -91,6 +91,9 @@ function initAudio() {
 function onScanSuccess(decodedText){
     if(!decodedText || decodedText === lastResult) return;
 
+    // Lógica nueva: Contar cuántos "@" hay en el resultado
+    const countAt = (decodedText.match(/@/g) || []).length;
+
     lastResult = decodedText;
 
     const outputDiv = document.getElementById("output");
@@ -102,12 +105,20 @@ function onScanSuccess(decodedText){
     if(navigator.vibrate) navigator.vibrate(120);
     playBeep();
 
+    // Enviar a Google
     fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
         method: "POST",
         mode: "no-cors", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codigo: decodedText })
     }).catch(err => console.error(err));
+
+    // Si detecta 8 arrobas, detenemos el scanner automáticamente
+    if (countAt >= 8) {
+        console.log("DNI detectado (8+ arrobas). Deteniendo...");
+        outputDiv.innerText = "DNI capturado con éxito:\n" + decodedText;
+        stopScanner(); // Esto detiene la cámara
+    }
 }
 
 function onScanFailure(error){}
