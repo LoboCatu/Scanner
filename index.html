@@ -700,42 +700,42 @@ function forzarMayusculas(input){
    GEOLOCALIZACIÓN
 ───────────────────────────────────────── */
 function capturarUbicacionSilenciosa(){
-
   return new Promise((resolve)=>{
 
     if(!navigator.geolocation){
-
-      resolve();
-
+      resolve(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-
       function(pos){
 
-        latitudActual  = pos.coords.latitude;
+        latitudActual = pos.coords.latitude;
         longitudActual = pos.coords.longitude;
 
-        resolve();
+        console.log("GPS OK:", latitudActual, longitudActual);
+
+        resolve(true);
 
       },
+      function(error){
 
-      function(){
+        console.log("Error GPS:", error);
 
-        resolve();
+        latitudActual = "";
+        longitudActual = "";
+
+        resolve(false);
 
       },
-
       {
-        enableHighAccuracy:true,
-        timeout:5000
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
-
     );
 
   });
-
 }
 
 /* ─────────────────────────────────────────
@@ -881,12 +881,12 @@ function obtenerUbicacion(){
 
 leyError.style.display = "none";
 
-capturarUbicacionSilenciosa()
-.then(()=>{
+  // 👇 AQUÍ ESTÁ EL CAMBIO REAL
+  await capturarUbicacionSilenciosa();
+
+  console.log("GPS:", latitudActual, longitudActual);
 
   enviarAlServer();
-
-});
 }
 
 function reproducirSonidoExito(){
