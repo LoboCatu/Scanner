@@ -7,7 +7,6 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-
 *{
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -207,15 +206,10 @@ button,
   50%{ transform: scale(1.15); opacity: 0.6; }
   100%{ transform: scale(1); opacity: 1; }
 }
-
 </style>
-
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
-     PANTALLA 1 — LOGIN
-════════════════════════════════════════════ -->
 <div id="pantallaLogin" class="card">
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -235,9 +229,6 @@ button,
   <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     PANTALLA 2 — FORMULARIO
-════════════════════════════════════════════ -->
 <div id="pantallaFormulario" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -252,87 +243,65 @@ button,
     👮 Operador: <span id="nombreOperador"></span>
   </div>
 
-  <!-- Botones de acción -->
   <div style="display: flex; gap: 10px; margin-top: 15px;">
-
-    <!-- 🔍 ESCANEAR DNI → ahora abre scanner de cámara en tiempo real -->
-    <button class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px;"
-            onclick="abrirScannerDNI()">
+    <button class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px;" onclick="abrirScannerDNI()">
       🔍 ESCANEAR<br>DNI
     </button>
 
-    <!-- ESCANEAR PATENTE (conservado como imagen, igual que antes) -->
     <label class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px; text-align: center;">
       🚘 ESCANEAR<br>PATENTE
       <input type="file" accept="image/*" capture="environment" style="display: none;">
     </label>
-
   </div>
 
   <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 5px;">
     <div style="flex: 1;">
-      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;"
-              onclick="ingresarDniManual()">📝 INGRESO<br>DNI</button>
+      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;" onclick="ingresarDniManual()">
+        📝 INGRESO<br>DNI
+      </button>
     </div>
     <div style="flex: 1;">
-      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;"
-              onclick="ingresarPatenteManual()">📝 INGRESO<br>PATENTE</button>
+      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;" onclick="ingresarPatenteManual()">
+        📝 INGRESO<br>PATENTE
+      </button>
     </div>
   </div>
 
-  <!-- Scanner de cámara en tiempo real (embebido en la misma tarjeta) -->
   <div id="pantallaScanner">
     <div id="scannerWrapper">
       <div id="reader"></div>
     </div>
     <div id="scannerStatus">Apunte al código del DNI...</div>
-    <button class="btn-externo btn-clear" id="scannerCancelBtn"
-            style="margin-top: 14px;" onclick="cerrarScanner()">
+    <button class="btn-externo btn-clear" id="scannerCancelBtn" style="margin-top: 14px;" onclick="cerrarScanner()">
       ❌ CANCELAR ESCANEO
     </button>
   </div>
 
-  <!-- Formulario de datos -->
   <div class="formulario-grid">
-
     <label class="col-izq">DNI *</label>
     <label class="col-der">PATENTE *</label>
 
-    <input id="dni" class="col-izq" type="text" inputmode="numeric"
-           pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
+    <input id="dni" class="col-izq" type="text" inputmode="numeric" pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
     <input id="patente" class="col-der" oninput="forzarMayusculas(this)">
 
     <label class="col-izq">APELLIDO *</label>
     <label class="col-der">NOMBRE *</label>
 
     <input id="apellido" class="col-izq" oninput="forzarMayusculas(this)">
-    <input id="nombre"   class="col-der" oninput="forzarMayusculas(this)">
+    <input id="nombre" class="col-der" oninput="forzarMayusculas(this)">
 
     <label class="label-completo">FECHA NACIMIENTO *</label>
-    <input id="fechaNacimiento"
-           class="campo-ancho-completo"
-           type="text"
-           placeholder="DD/MM/AAAA"
-           maxlength="10"
-           inputmode="numeric"
-           oninput="aplicarMascaraFecha(this)"
-           onblur="validarFechaReal(this)">
+    <input id="fechaNacimiento" class="campo-ancho-completo" type="text" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="aplicarMascaraFecha(this)" onblur="validarFechaReal(this)">
 
     <label class="label-completo">OBSERVACIONES</label>
-    <textarea id="observacion" class="campo-ancho-completo"
-              oninput="forzarMayusculas(this)"></textarea>
-
+    <textarea id="observacion" class="campo-ancho-completo" oninput="forzarMayusculas(this)"></textarea>
   </div>
 
-  <div id="leyendaError" style="display:none; color:#ffbcbc; background:rgba(193,18,31,0.4);
-       border-radius:10px; padding:10px; text-align:center; font-size:13px;
-       font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
+  <div id="leyendaError" style="display:none; color:#ffbcbc; background:rgba(193,18,31,0.4); border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
     ⚠️ Error: Los campos con asterisco (*) son obligatorios.
   </div>
 
-  <div id="leyendaExito" style="display:none; color:#d1e7dd; background:rgba(14,168,93,0.4);
-       border-radius:10px; padding:10px; text-align:center; font-size:13px;
-       font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
+  <div id="leyendaExito" style="display:none; color:#d1e7dd; background:rgba(14,168,93,0.4); border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
     ✅ GUARDADO CON ÉXITO
   </div>
 
@@ -342,9 +311,6 @@ button,
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     PANTALLA 3 — RESULTADO DE CONTROL
-════════════════════════════════════════════ -->
 <div id="pantallaControl" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -354,16 +320,11 @@ button,
       <div class="barra"></div>
     </div>
   </div>
-  <div id="contenidoControl"
-       style="background:white; border-radius:20px; padding:20px;
-              min-height:350px; color:#012b63;"></div>
+  <div id="contenidoControl" style="background:white; border-radius:20px; padding:20px; min-height:350px; color:#012b63;"></div>
   <button class="btn-clear" style="margin-top:20px;" onclick="volverFormulario()">⬅ VOLVER</button>
 </div>
 
 
-<!-- ═══════════════════════════════════════════
-     JAVASCRIPT
-════════════════════════════════════════════ -->
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQbpU_MsySDGrGOlbSlY9dfa8yqp6Lw90DQRVsxkmSn6eIbQA/exec";
 
@@ -371,6 +332,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQb
 let usuarioActivo  = "";
 let latitudActual  = "";
 let longitudActual = "";
+let idRelojGPS     = null; // Guarda el ID del rastreador continuo en vivo
 
 /* ── Scanner ── */
 let scanner       = null;
@@ -402,7 +364,7 @@ function construirSelectorUsuarios(lista){
 }
 
 /* ─────────────────────────────────────────
-   LOGIN
+   LOGIN & ACTIVACIÓN GPS EN TIEMPO REAL
 ───────────────────────────────────────── */
 function rellenarTextBoxUsuario(){
   document.getElementById("usuario").value =
@@ -410,7 +372,6 @@ function rellenarTextBoxUsuario(){
 }
 
 async function iniciarSesion(){
-
   const user = document.getElementById("usuario").value.trim();
   const pass = document.getElementById("clave").value.trim();
 
@@ -425,25 +386,50 @@ async function iniciarSesion(){
   const data = await res.json();
 
   if(data.valido){
-
     usuarioActivo = user;
-
     document.getElementById("nombreOperador").innerText = usuarioActivo;
-
     document.getElementById("pantallaLogin").hidden = true;
-
     document.getElementById("pantallaFormulario").hidden = false;
 
-  }else{
+    // 🚀 GPS CONTINUO: Empieza a calcular la ubicación en vivo apenas entra al sistema
+    iniciarRastreoGPSContinuo(); 
+  } else {
     alert("Usuario o contraseña incorrectos");
   }
 }
 
 /* ─────────────────────────────────────────
-   SCANNER DE CÁMARA EN TIEMPO REAL
-   (reemplaza el input[file] del botón DNI)
+   SISTEMA DE SEGUIMIENTO GPS CONTINUO
 ───────────────────────────────────────── */
+function iniciarRastreoGPSContinuo() {
+  if (!navigator.geolocation) {
+    console.warn("El navegador o dispositivo no soporta Geolocalización.");
+    return;
+  }
+  if (idRelojGPS !== null) return; // Evita duplicar tareas en segundo plano
 
+  console.log("🚀 Rastreador GPS Activo");
+
+  idRelojGPS = navigator.geolocation.watchPosition(
+    function(pos) {
+      latitudActual  = pos.coords.latitude;
+      longitudActual = pos.coords.longitude;
+      console.log("📍 Coordenadas refrescadas en vivo:", latitudActual, longitudActual);
+    },
+    function(error) {
+      console.warn("⚠️ Advertencia del módulo GPS:", error.message);
+    },
+    {
+      enableHighAccuracy: true, // Solicita el hardware de GPS dedicado (alta precisión)
+      timeout: 10000,           // Margen de espera si la señal decae en zona rural
+      maximumAge: 0             // Exige coordenadas frescas del satélite, sin caché viejo
+    }
+  );
+}
+
+/* ─────────────────────────────────────────
+   SCANNER DE CÁMARA EN TIEMPO REAL
+───────────────────────────────────────── */
 function initAudio(){
   if(!audioCtx){
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -522,38 +508,24 @@ function detenerScanner(){
 }
 
 async function onScanExito(decodedText){
-
-  /* Evitar disparos duplicados */
   if(!decodedText || decodedText === ultimoResult) return;
 
   /* VALIDAR DNI ARGENTINO */
-  const cantidadArrobas =
-    (decodedText.match(/@/g) || []).length;
-
-  /* Si NO tiene exactamente 8 @ → seguir escaneando */
+  const cantidadArrobas = (decodedText.match(/@/g) || []).length;
   if(cantidadArrobas !== 8){
-
     console.log("Código inválido");
-
     return;
   }
 
   ultimoResult = decodedText;
 
-  /* Feedback: vibración + beep */
   if(navigator.vibrate) navigator.vibrate(120);
-
   playBeep();
 
-  /* Poblar campos del formulario con los datos del DNI */
   procesarTexto(decodedText);
-
-  /* Cerrar scanner */
   cerrarScanner();
 
-  /* Capturar ubicación y buscar persona */
-  await capturarUbicacionSilenciosa();
-
+  /* ⚡ INSTANTÁNEO: Al estar el GPS activo continuamente, las coordenadas ya están listas */
   buscarPersona();
 }
 
@@ -579,9 +551,9 @@ function playBeep(){
 function procesarTexto(texto){
   const datos = texto.split("@");
   if(datos.length >= 7){
-    document.getElementById("dni").value            = datos[4].trim();
-    document.getElementById("apellido").value       = datos[1].trim();
-    document.getElementById("nombre").value         = datos[2].trim();
+    document.getElementById("dni").value             = datos[4].trim();
+    document.getElementById("apellido").value        = datos[1].trim();
+    document.getElementById("nombre").value          = datos[2].trim();
     document.getElementById("fechaNacimiento").value = datos[6].trim();
   } else {
     document.getElementById("dni").value = texto.trim();
@@ -589,22 +561,20 @@ function procesarTexto(texto){
 }
 
 /* ─────────────────────────────────────────
-   INGRESO MANUAL
+   INGRESOS MANUALES (Instantáneos por GPS en Vivo)
 ───────────────────────────────────────── */
-async function ingresarDniManual(){
+function ingresarDniManual(){
   const dniValor = document.getElementById("dni").value.trim();
   if(dniValor !== ""){
-    await capturarUbicacionSilenciosa();
     buscarPersona();
   } else {
     document.getElementById("dni").focus();
   }
 }
 
-async function ingresarPatenteManual(){
+function ingresarPatenteManual(){
   const patValor = document.getElementById("patente").value.trim();
   if(patValor !== ""){
-await capturarUbicacionSilenciosa();
     buscarVehiculo();
   } else {
     document.getElementById("patente").focus();
@@ -624,49 +594,7 @@ function forzarMayusculas(input){
 }
 
 /* ─────────────────────────────────────────
-   GEOLOCALIZACIÓN
-───────────────────────────────────────── */
-function capturarUbicacionSilenciosa(){
-
-  return new Promise((resolve)=>{
-
-    if(!navigator.geolocation){
-
-      resolve();
-
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-
-      function(pos){
-
-        latitudActual  = pos.coords.latitude;
-        longitudActual = pos.coords.longitude;
-
-        resolve();
-
-      },
-
-      function(){
-
-        resolve();
-
-      },
-
-      {
-        enableHighAccuracy:true,
-        timeout:5000
-      }
-
-    );
-
-  });
-
-}
-
-/* ─────────────────────────────────────────
-   BÚSQUEDA EN SHEETS
+   BÚSQUEDAS EN GOOGLE SHEETS
 ───────────────────────────────────────── */
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
@@ -677,19 +605,17 @@ function buscarPersona(){
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-fetch(API_URL + "?accion=buscarPersona",{
-  method:"POST",
-  body: JSON.stringify({
-    dni:dni
-  })
-})
-.then(r=>r.json())
-.then(res=>{
-  setTimeout(()=>{
-    mostrarResultadoControl(res);
-  },1200);
-});
 
+  fetch(API_URL + "?accion=buscarPersona",{
+    method:"POST",
+    body: JSON.stringify({ dni:dni })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    setTimeout(()=>{
+      mostrarResultadoControl(res);
+    },1200);
+  });
 }
 
 function buscarVehiculo(){
@@ -701,26 +627,24 @@ function buscarVehiculo(){
        <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-fetch(API_URL + "?accion=buscarVehiculo",{
-  method:"POST",
-  body: JSON.stringify({
-    patente:patente
+
+  fetch(API_URL + "?accion=buscarVehiculo",{
+    method:"POST",
+    body: JSON.stringify({ patente:patente })
   })
-})
-.then(r=>r.json())
-.then(res=>{
-  setTimeout(()=>{
-    mostrarResultadoControl(res);
-  },1200);
-});
+  .then(r=>r.json())
+  .then(res=>{
+    setTimeout(()=>{
+      mostrarResultadoControl(res);
+    },1200);
+  });
 }
 
 function mostrarResultadoControl(data){
   const box = document.getElementById("contenidoControl");
   if(!data.encontrado){
     box.innerHTML =
-      `<div style="text-align:center; font-size:34px; font-weight:900;
-                   color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
+      `<div style="text-align:center; font-size:34px; font-weight:900; color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
     return;
   }
   const fotoHTML = data.foto
@@ -729,26 +653,22 @@ function mostrarResultadoControl(data){
 
   if(data.tipo === "vehiculo"){
     box.innerHTML =
-      `<div style="text-align:center; font-size:24px; font-weight:900;
-                   margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
+      `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>PATENTE:</b> ${data.patente}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>MARCA:</b> ${data.marca}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>MODELO:</b> ${data.modelo || ""}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>COLOR:</b> ${data.color || ""}</div>
        ${fotoHTML}
-       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827;
-                   white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
+       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827; white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
   } else {
     box.innerHTML =
-      `<div style="text-align:center; font-size:24px; font-weight:900;
-                   margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
+      `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>ESTADO:</b> ${data.estado || ""}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>DNI:</b> ${data.dni}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>APELLIDO:</b> ${data.apellido}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>NOMBRE:</b> ${data.nombre}</div>
        ${fotoHTML}
-       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827;
-                   white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
+       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827; white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
   }
 }
 
@@ -758,9 +678,9 @@ function volverFormulario(){
 }
 
 /* ─────────────────────────────────────────
-   GUARDAR
+   GUARDAR DATOS EN LA HOJA DE EXCEL
 ───────────────────────────────────────── */
-async function obtenerUbicacion(){
+function obtenerUbicacion(){
   const dni = document.getElementById("dni").value.trim();
   const ape = document.getElementById("apellido").value.trim();
   const nom = document.getElementById("nombre").value.trim();
@@ -782,14 +702,12 @@ async function obtenerUbicacion(){
   }
 
   leyError.style.display = "none";
-  await capturarUbicacionSilenciosa(); // <--- Agregado await
-  enviarAlServer();
+  enviarAlServer(); // Envío directo e inmediato
 }
 
 function reproducirSonidoExito(){
   try{
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
     const osc1  = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.connect(gain1);
@@ -815,53 +733,58 @@ function reproducirSonidoExito(){
 }
 
 async function enviarAlServer(){
-
+  // Resguardamos en constantes los valores que el GPS escribe de fondo de manera continua
   const latEnvio = latitudActual;
   const lonEnvio = longitudActual;
 
+  // CORREGIDO: Empaquetamos obligatoriamente la propiedad 'accion' dentro del JSON para el doPost(e)
   const data = {
-    usuario:usuarioActivo,
-    dni:document.getElementById("dni").value,
-    apellido:document.getElementById("apellido").value,
-    nombre:document.getElementById("nombre").value,
-    fechaNacimiento:document.getElementById("fechaNacimiento").value,
-    patente:document.getElementById("patente").value,
-    observacion:document.getElementById("observacion").value,
-    latitud: latEnvio, // <--- Enviamos la constante local segura
-    longitud: lonEnvio // <--- Enviamos la constante local segura
+    accion: "guardar", 
+    usuario: usuarioActivo,
+    dni: document.getElementById("dni").value,
+    apellido: document.getElementById("apellido").value,
+    nombre: document.getElementById("nombre").value,
+    fechaNacimiento: document.getElementById("fechaNacimiento").value,
+    patente: document.getElementById("patente").value,
+    observacion: document.getElementById("observacion").value,
+    latitud: latEnvio, 
+    longitud: lonEnvio 
   };
 
-  const res = await fetch(API_URL + "?accion=guardar",{
-    method:"POST",
-    body: JSON.stringify(data)
-  });
+  try {
+    // CORREGIDO: Envío POST a la URL limpia sin duplicar parámetros en formato query
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
 
-  const resultado = await res.json();
+    const resultado = await res.json();
 
-  if(resultado.ok){
+    if(resultado.ok){
+      limpiar();
+      reproducirSonidoExito();
+      const leyExito = document.getElementById("leyendaExito");
+      leyExito.style.display = "block";
 
-    limpiar();
-
-    reproducirSonidoExito();
-
-    const leyExito =
-      document.getElementById("leyendaExito");
-
-    leyExito.style.display = "block";
-
-    setTimeout(()=>{
-      leyExito.style.display = "none";
-    },4000);
+      setTimeout(()=>{
+        leyExito.style.display = "none";
+      }, 4000);
+    } else {
+      alert("Error de la API: " + (resultado.error || "No se pudo registrar la información."));
+    }
+  } catch(e) {
+    alert("Error de red. Asegúrese de tener datos móviles o señal de internet estable.");
+    console.error(e);
   }
 }
-
 
 function limpiar(){
   ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
     .forEach(id => { document.getElementById(id).value = ""; });
   document.getElementById("leyendaError").style.display = "none";
-  latitudActual  = "";
-  longitudActual = "";
+  
+  // CORREGIDO: Ya NO vaciamos latitudActual ni longitudActual aquí.
+  // Mantiene las últimas coordenadas válidas si se cargan controles fijos seguidos.
 }
 
 /* ─────────────────────────────────────────
@@ -909,7 +832,6 @@ function validarFechaReal(input){
   }
   return true;
 }
-
 </script>
 </body>
 </html>
