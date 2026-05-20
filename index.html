@@ -383,17 +383,28 @@ let audioCtx      = null;
 /* ─────────────────────────────────────────
    INICIO — cargar lista de usuarios
 ───────────────────────────────────────── */
-window.onload = async function(){
+window.onload = async function () {
+  try {
+    const res = await fetch(API_URL + "?accion=usuarios", {
+      method: "GET"
+    });
 
-const res = await fetch(API_URL + "?accion=usuarios", {
-  method: "GET"
-});
+    const data = await res.json();
 
-  const data = await res.json();
+    console.log("USUARIOS RESPUESTA:", data);
 
-  construirSelectorUsuarios(data.usuarios);
+    if (data && data.usuarios) {
+      construirSelectorUsuarios(data.usuarios);
+    } else {
+      alert("No llegaron usuarios del servidor");
+    }
+
+  } catch (e) {
+    console.error(e);
+    alert("Error cargando usuarios");
+  }
 };
-
+  
 function construirSelectorUsuarios(lista){
   const select = document.getElementById("desplegableUsuario");
   select.innerHTML = '<option value="">-- Seleccionar --</option>';
