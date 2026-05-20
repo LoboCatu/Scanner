@@ -528,7 +528,7 @@ async function onScanExito(decodedText){
 
   /* VALIDAR DNI ARGENTINO */
   const cantidadArrobas = (decodedText.match(/@/g) || []).length;
-  if(cantidadArrobas !== 8){
+  if(cantidadArrobas <= 7){
     console.log("Código inválido");
     return;
   }
