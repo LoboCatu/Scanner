@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+f<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -218,7 +218,7 @@ button,
 ════════════════════════════════════════════ -->
 <div id="pantallaLogin" class="card">
   <div class="header">
-    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-/ESCUDO4_fpn3hb.png">
     <div class="header-text">
       <h2>POLICÍA</h2>
       <p>PROVINCIA DE SANTA FE</p>
@@ -240,7 +240,7 @@ button,
 ════════════════════════════════════════════ -->
 <div id="pantallaFormulario" class="card" hidden>
   <div class="header">
-    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-/ESCUDO4_fpn3hb.png">
     <div class="header-text">
       <h2>POLICÍA</h2>
       <p>PROVINCIA DE SANTA FE</p>
@@ -343,18 +343,18 @@ button,
 </div>
 
 <!-- ═══════════════════════════════════════════
-     PANTALLA 3 — RESULTADO DE CONTROL
+     PANTALLA 3 — RESULTADO DE 
 ════════════════════════════════════════════ -->
-<div id="pantallaControl" class="card" hidden>
+<div id="pantalla" class="card" hidden>
   <div class="header">
-    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-/ESCUDO4_fpn3hb.png">
     <div class="header-text">
       <h2>RESULTADO</h2>
-      <p>CONTROL REALIZADO</p>
+      <p> REALIZADO</p>
       <div class="barra"></div>
     </div>
   </div>
-  <div id="contenidoControl"
+  <div id="contenido"
        style="background:white; border-radius:20px; padding:20px;
               min-height:350px; color:#012b63;"></div>
   <button class="btn-clear" style="margin-top:20px;" onclick="volverFormulario()">⬅ VOLVER</button>
@@ -643,7 +643,7 @@ function capturarUbicacionSilenciosa(){
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
   document.getElementById("pantallaFormulario").hidden = true;
-  document.getElementById("pantallaControl").hidden    = false;
+  document.getElementById("pantalla").hidden    = false;
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
@@ -692,7 +692,7 @@ function mostrarResultadoControl(data){
   if(!data.encontrado){
     box.innerHTML =
       `<div style="text-align:center; font-size:34px; font-weight:900;
-                   color:#0ea85d; margin-top:100px;">✅ CONTROL NEGATIVO ✅</div>`;
+                   color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
     return;
   }
   const fotoHTML = data.foto
@@ -702,7 +702,7 @@ function mostrarResultadoControl(data){
   if(data.tipo === "vehiculo"){
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900;
-                   margin-bottom:25px; color:#c1121f;">⚠ CONTROL POSITIVO ⚠</div>
+                   margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>PATENTE:</b> ${data.patente}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>MARCA:</b> ${data.marca}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>MODELO:</b> ${data.modelo || ""}</div>
@@ -713,7 +713,7 @@ function mostrarResultadoControl(data){
   } else {
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900;
-                   margin-bottom:25px; color:#c1121f;">⚠ CONTROL POSITIVO ⚠</div>
+                   margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>ESTADO:</b> ${data.estado || ""}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>DNI:</b> ${data.dni}</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>APELLIDO:</b> ${data.apellido}</div>
