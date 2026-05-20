@@ -385,9 +385,9 @@ let audioCtx      = null;
 ───────────────────────────────────────── */
 window.onload = async function(){
 
-  const res = await fetch(API_URL + "?accion=usuarios", {
-    method:"POST"
-  });
+const res = await fetch(API_URL + "?accion=usuarios", {
+  method: "GET"
+});
 
   const data = await res.json();
 
