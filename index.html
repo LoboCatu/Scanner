@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.2">
 
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -381,7 +381,6 @@ let audioCtx      = null;
 /* ─────────────────────────────────────────
    INICIO — cargar lista de usuarios
 ───────────────────────────────────────── */
-const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQbpU_MsySDGrGOlbSlY9dfa8yqp6Lw90DQRVsxkmSn6eIbQA/exec";
 window.onload = async function(){
 
   const res = await fetch(API_URL + "?accion=usuarios", {
@@ -647,6 +646,8 @@ fetch(API_URL + "?accion=buscarPersona",{
   },1200);
 });
 
+}
+
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
   document.getElementById("pantallaFormulario").hidden = true;
@@ -806,14 +807,6 @@ async function enviarAlServer(){
   }
 }
 
-  google.script.run.withSuccessHandler(() => {
-    limpiar();
-    reproducirSonidoExito();
-    const leyExito = document.getElementById("leyendaExito");
-    leyExito.style.display = "block";
-    setTimeout(() => { leyExito.style.display = "none"; }, 4000);
-  }).guardarDatos(data);
-}
 
 function limpiar(){
   ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
