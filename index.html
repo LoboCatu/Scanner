@@ -524,12 +524,27 @@ function detenerScanner(){
 }
 
 function onScanExito(decodedText){
+
   /* Evitar disparos duplicados */
   if(!decodedText || decodedText === ultimoResult) return;
+
+  /* VALIDAR DNI ARGENTINO */
+  const cantidadArrobas =
+    (decodedText.match(/@/g) || []).length;
+
+  /* Si NO tiene exactamente 8 @ → seguir escaneando */
+  if(cantidadArrobas !== 8){
+
+    console.log("Código inválido");
+
+    return;
+  }
+
   ultimoResult = decodedText;
 
   /* Feedback: vibración + beep */
   if(navigator.vibrate) navigator.vibrate(120);
+
   playBeep();
 
   /* Poblar campos del formulario con los datos del DNI */
@@ -540,6 +555,7 @@ function onScanExito(decodedText){
 
   /* Capturar ubicación y buscar persona */
   capturarUbicacionSilenciosa();
+
   buscarPersona();
 }
 
