@@ -240,6 +240,9 @@ button,
     </div>
   </div>
 
+  <input type="hidden" id="validacionDNI" value="NO">
+  <input type="hidden" id="validacionPATENTE" value="NO">
+  
   <div class="usuario-logueado">
     👮 Operador: <span id="nombreOperador"></span>
   </div>
@@ -308,7 +311,7 @@ button,
 
   <div style="display:flex; gap:10px; margin-top:25px;">
     <div style="flex:1;"><button class="btn-save" onclick="obtenerUbicacion()">💾 GUARDAR</button></div>
-    <div style="flex:1;"><button class="btn-clear" onclick="limpiar()">🗑 LIMPIAR</button></div>
+    <div style="flex:1;"><button class="btn-clear" onclick="limpiarManual()">🗑 LIMPIAR</button></div>
   </div>
 </div>
 
@@ -438,7 +441,8 @@ function initAudio(){
 }
 
 function abrirScannerDNI(){
-  limpiar();
+  // Limpia textos de inputs, pero preserva el estado para la consulta entrante
+  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"].forEach(id => { document.getElementById(id).value = ""; });
   
   // 🚀 AL ESCANEAR: Establece validacionDNI en SI y patente en NO
   document.getElementById("validacionDNI").value = "SI";
@@ -447,7 +451,6 @@ function abrirScannerDNI(){
   document.getElementById("pantallaScanner").style.display = "flex";
   document.getElementById("scannerStatus").innerText = "Iniciando cámara...";
   iniciarScanner();
-}rScanner();
 }
 
 function cerrarScanner(){
@@ -737,11 +740,9 @@ function reproducirSonidoExito(){
 }
 
 async function enviarAlServer(){
-  // Resguardamos en constantes los valores que el GPS escribe de fondo de manera continua
   const latEnvio = latitudActual;
   const lonEnvio = longitudActual;
 
-  // CORREGIDO: Empaquetamos obligatoriamente la propiedad 'accion' dentro del JSON para el doPost(e)
   const data = {
     accion: "guardar", 
     usuario: usuarioActivo,
@@ -752,11 +753,12 @@ async function enviarAlServer(){
     patente: document.getElementById("patente").value,
     observacion: document.getElementById("observacion").value,
     latitud: latEnvio, 
-    longitud: lonEnvio 
+    longitud: lonEnvio,
+    validacionDNI: document.getElementById("validacionDNI").value,         
+    validacionPATENTE: document.getElementById("validacionPATENTE").value   
   };
 
   try {
-    // CORREGIDO: Envío POST a la URL limpia sin duplicar parámetros en formato query
     const res = await fetch(API_URL, {
       method: "POST",
       body: JSON.stringify(data)
@@ -765,7 +767,7 @@ async function enviarAlServer(){
     const resultado = await res.json();
 
     if(resultado.ok){
-      limpiar();
+      limpiarTodoEfectivo();
       reproducirSonidoExito();
       const leyExito = document.getElementById("leyendaExito");
       leyExito.style.display = "block";
@@ -782,13 +784,20 @@ async function enviarAlServer(){
   }
 }
 
-function limpiar(){
+// Limpieza total post-guardado exitoso en servidor
+function limpiarTodoEfectivo(){
+  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("validacionDNI").value = "NO";
+  document.getElementById("validacionPATENTE").value = "NO";
+  document.getElementById("leyendaError").style.display = "none";
+}
+
+// Acción del botón limpiar manual (Preserva las banderas por si va a re-ejecutar búsquedas)
+function limpiarManual(){
   ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
     .forEach(id => { document.getElementById(id).value = ""; });
   document.getElementById("leyendaError").style.display = "none";
-  
-  // CORREGIDO: Ya NO vaciamos latitudActual ni longitudActual aquí.
-  // Mantiene las últimas coordenadas válidas si se cargan controles fijos seguidos.
 }
 
 /* ─────────────────────────────────────────
@@ -839,4 +848,3 @@ function validarFechaReal(input){
 </script>
 </body>
 </html>
-
