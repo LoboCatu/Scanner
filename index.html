@@ -365,6 +365,7 @@ button,
      JAVASCRIPT
 ════════════════════════════════════════════ -->
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQbpU_MsySDGrGOlbSlY9dfa8yqp6Lw90DQRVsxkmSn6eIbQA/exec";
 
 /* ── Estado global ── */
 let usuarioActivo  = "";
@@ -380,10 +381,16 @@ let audioCtx      = null;
 /* ─────────────────────────────────────────
    INICIO — cargar lista de usuarios
 ───────────────────────────────────────── */
-window.onload = function(){
-  google.script.run
-    .withSuccessHandler(construirSelectorUsuarios)
-    .obtenerListaUsuarios();
+const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQbpU_MsySDGrGOlbSlY9dfa8yqp6Lw90DQRVsxkmSn6eIbQA/exec";
+window.onload = async function(){
+
+  const res = await fetch(API_URL + "?accion=usuarios", {
+    method:"POST"
+  });
+
+  const data = await res.json();
+
+  construirSelectorUsuarios(data.usuarios);
 };
 
 function construirSelectorUsuarios(lista){
@@ -405,19 +412,34 @@ function rellenarTextBoxUsuario(){
     document.getElementById("desegnableUsuario").value;
 }
 
-function iniciarSesion(){
+async function iniciarSesion(){
+
   const user = document.getElementById("usuario").value.trim();
   const pass = document.getElementById("clave").value.trim();
-  google.script.run.withSuccessHandler(function(res){
-    if(res.valido){
-      usuarioActivo = user;
-      document.getElementById("nombreOperador").innerText = usuarioActivo;
-      document.getElementById("pantallaLogin").hidden      = true;
-      document.getElementById("pantallaFormulario").hidden = false;
-    } else {
-      alert("Usuario o contraseña incorrectos");
-    }
-  }).validarCredenciales(user, pass);
+
+  const res = await fetch(API_URL + "?accion=login",{
+    method:"POST",
+    body: JSON.stringify({
+      usuario:user,
+      clave:pass
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.valido){
+
+    usuarioActivo = user;
+
+    document.getElementById("nombreOperador").innerText = usuarioActivo;
+
+    document.getElementById("pantallaLogin").hidden = true;
+
+    document.getElementById("pantallaFormulario").hidden = false;
+
+  }else{
+    alert("Usuario o contraseña incorrectos");
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -612,10 +634,18 @@ function buscarPersona(){
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-  google.script.run
-    .withSuccessHandler(res => { setTimeout(() => { mostrarResultadoControl(res); }, 1200); })
-    .buscarPersonaPorDNI(dni);
-}
+fetch(API_URL + "?accion=buscarPersona",{
+  method:"POST",
+  body: JSON.stringify({
+    dni:dni
+  })
+})
+.then(r=>r.json())
+.then(res=>{
+  setTimeout(()=>{
+    mostrarResultadoControl(res);
+  },1200);
+});
 
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
@@ -626,9 +656,18 @@ function buscarVehiculo(){
        <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-  google.script.run
-    .withSuccessHandler(res => { setTimeout(() => { mostrarResultadoControl(res); }, 1200); })
-    .buscarVehiculoPorPatente(patente);
+fetch(API_URL + "?accion=buscarVehiculo",{
+  method:"POST",
+  body: JSON.stringify({
+    patente:patente
+  })
+})
+.then(r=>r.json())
+.then(res=>{
+  setTimeout(()=>{
+    mostrarResultadoControl(res);
+  },1200);
+});
 }
 
 function mostrarResultadoControl(data){
@@ -729,18 +768,43 @@ function reproducirSonidoExito(){
   } catch(e){}
 }
 
-function enviarAlServer(){
+async function enviarAlServer(){
+
   const data = {
-    usuario:        usuarioActivo,
-    dni:            document.getElementById("dni").value,
-    apellido:       document.getElementById("apellido").value,
-    nombre:         document.getElementById("nombre").value,
+    usuario:usuarioActivo,
+    dni:document.getElementById("dni").value,
+    apellido:document.getElementById("apellido").value,
+    nombre:document.getElementById("nombre").value,
     fechaNacimiento:document.getElementById("fechaNacimiento").value,
-    patente:        document.getElementById("patente").value,
-    observacion:    document.getElementById("observacion").value,
-    latitud:        latitudActual,
-    longitud:       longitudActual
+    patente:document.getElementById("patente").value,
+    observacion:document.getElementById("observacion").value,
+    latitud:latitudActual,
+    longitud:longitudActual
   };
+
+  const res = await fetch(API_URL + "?accion=guardar",{
+    method:"POST",
+    body: JSON.stringify(data)
+  });
+
+  const resultado = await res.json();
+
+  if(resultado.ok){
+
+    limpiar();
+
+    reproducirSonidoExito();
+
+    const leyExito =
+      document.getElementById("leyendaExito");
+
+    leyExito.style.display = "block";
+
+    setTimeout(()=>{
+      leyExito.style.display = "none";
+    },4000);
+  }
+}
 
   google.script.run.withSuccessHandler(() => {
     limpiar();
