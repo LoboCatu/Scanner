@@ -870,18 +870,31 @@ function forzarMayusculas(input){
 
 function capturarUbicacionSilenciosa(){
 
-  if(navigator.geolocation){
+  return new Promise((resolve)=>{
+
+    if(!navigator.geolocation){
+
+      resolve();
+
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
 
       function(pos){
 
-        latitudActual = pos.coords.latitude;
+        latitudActual  = pos.coords.latitude;
         longitudActual = pos.coords.longitude;
+
+        resolve();
 
       },
 
-      function(){},
+      function(){
+
+        resolve();
+
+      },
 
       {
         enableHighAccuracy:true,
@@ -890,7 +903,7 @@ function capturarUbicacionSilenciosa(){
 
     );
 
-  }
+  });
 
 }
 
