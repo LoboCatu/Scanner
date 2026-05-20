@@ -552,9 +552,10 @@ function onScanExito(decodedText){
   cerrarScanner();
 
   /* Capturar ubicación y buscar persona */
-capturarUbicacionSilenciosa().then(() => {
+  capturarUbicacionSilenciosa();
+
   buscarPersona();
-});
+}
 
 function playBeep(){
   try{
@@ -667,53 +668,51 @@ function capturarUbicacionSilenciosa(){
 /* ─────────────────────────────────────────
    BÚSQUEDA EN SHEETS
 ───────────────────────────────────────── */
-async function buscarPersona(){
+function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
-
   document.getElementById("pantallaFormulario").hidden = true;
-  document.getElementById("pantallaControl").hidden = false;
-
+  document.getElementById("pantallaControl").hidden    = false;
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-
-  await capturarUbicacionSilenciosa(); // 🔥 IMPORTANTE
-
-  fetch(API_URL + "?accion=buscarPersona",{
-    method:"POST",
-    body: JSON.stringify({ dni })
+fetch(API_URL + "?accion=buscarPersona",{
+  method:"POST",
+  body: JSON.stringify({
+    dni:dni
   })
-  .then(r=>r.json())
-  .then(res=>{
-    setTimeout(()=>mostrarResultadoControl(res),1200);
-  });
+})
+.then(r=>r.json())
+.then(res=>{
+  setTimeout(()=>{
+    mostrarResultadoControl(res);
+  },1200);
+});
+
 }
 
-async function buscarVehiculo(){
+function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
-
   document.getElementById("pantallaFormulario").hidden = true;
   document.getElementById("pantallaControl").hidden    = false;
-
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
      </div>`;
-
-  // 🔥 ESPERA LA UBICACIÓN
-  await capturarUbicacionSilenciosa();
-
-  fetch(API_URL + "?accion=buscarVehiculo",{
-    method:"POST",
-    body: JSON.stringify({ patente })
+fetch(API_URL + "?accion=buscarVehiculo",{
+  method:"POST",
+  body: JSON.stringify({
+    patente:patente
   })
-  .then(r=>r.json())
-  .then(res=>{
-    setTimeout(()=>mostrarResultadoControl(res),1200);
-  });
+})
+.then(r=>r.json())
+.then(res=>{
+  setTimeout(()=>{
+    mostrarResultadoControl(res);
+  },1200);
+});
 }
 
 function mostrarResultadoControl(data){
@@ -783,9 +782,7 @@ function obtenerUbicacion(){
   }
 
   leyError.style.display = "none";
-  capturarUbicacionSilenciosa().then(() => {
   enviarAlServer();
-});;
 }
 
 function reproducirSonidoExito(){
