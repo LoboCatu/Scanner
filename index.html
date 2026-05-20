@@ -1,196 +1,810 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Scanner DNI Argentina</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.2">
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
+
+*{
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body{
-    margin:0;
-    background:#0b2a4a;
-    color:white;
-    font-family:Arial;
-    text-align:center;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, #012b63 0%, #023b86 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 15px;
+  color: white;
 }
 
-h1{
-    font-size:20px;
-    margin:15px;
+.card{
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 25px;
+  padding: 22px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-#reader{
-    width:100%;
-    max-width:450px;
-    margin:auto;
-    border-radius:10px;
-    overflow:hidden;
+.header{
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
-button{
-    padding:12px 18px;
-    margin:10px 5px;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    background:#1e88e5;
-    color:white;
-    cursor:pointer;
+.escudo{
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
 }
 
-button:active{
-    background:#1565c0;
+.header-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.result{
-    margin:15px;
-    padding:15px;
-    background:#123a63;
-    border: 2px solid #1e88e5;
-    border-radius:8px;
-    font-size:16px;
-    font-weight: bold;
-    word-break: break-all;
-    transition: background 0.2s ease;
+.header-text h2 {
+  margin: 0;
+  font-size: 24px;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
-.flash-success {
-    background: #1b5e20 !important;
+.header-text p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
 }
+
+.barra{
+  width: 100px;
+  height: 5px;
+  margin: 8px 0 0;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #d61f1f 0%, #ffffff 50%, #1d8ed8 100%);
+}
+
+label{
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  align-items: center;
+}
+
+.col-izq { grid-column: 1 / 2; }
+.col-der { grid-column: 2 / 3; }
+.campo-ancho-completo { grid-column: 1 / 3; }
+
+.formulario-grid label {
+  margin-top: 12px;
+  margin-bottom: 2px;
+}
+.label-completo { grid-column: 1 / 3; }
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: none;
+  border-radius: 20px;
+  padding: 16px 20px;
+  font-size: 16px;
+  background: #f0f2f5;
+  color: #012b63;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+textarea {
+  resize: none;
+  height: 55px;
+}
+
+button,
+.btn-externo{
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-login{
+  background: linear-gradient(180deg, #0d6efd 0%, #084298 100%);
+  margin-top: 18px;
+}
+
+.btn-save{
+  background: linear-gradient(180deg, #0ea85d 0%, #087443 100%);
+  margin-top: 0px;
+}
+
+.btn-clear{
+  background: linear-gradient(180deg, #5f6b7a 0%, #3d4752 100%);
+  margin-top: 0px;
+}
+
+.btn-externo{
+  display: block;
+  background: linear-gradient(180deg, #0d6efd 0%, #084298 100%);
+  margin-top: 15px;
+}
+
+.usuario-logueado{
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* ── SCANNER OVERLAY ── */
+#pantallaScanner {
+  display: none;          /* mostrado con JS */
+  flex-direction: column;
+}
+
+#scannerWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+  margin-top: 12px;
+}
+
+/* html5-qrcode inyecta su propio div; lo contenemos */
+#reader {
+  width: 100%;
+}
+
+#scannerCancelBtn {
+  margin-top: 14px;
+  background: linear-gradient(180deg, #c1121f 0%, #7b0d14 100%);
+}
+
+/* pequeño mensaje de estado bajo el visor */
+#scannerStatus {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 10px;
+  min-height: 20px;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.75);
+}
+
+/* ── animaciones ── */
+@keyframes pulse{
+  0%{ transform: scale(1); opacity: 1; }
+  50%{ transform: scale(1.15); opacity: 0.6; }
+  100%{ transform: scale(1); opacity: 1; }
+}
+
 </style>
-</head>
 
+</head>
 <body>
 
-<h1>Scanner DNI Argentina</h1>
-
-<div id="reader"></div>
-
-<button onclick="startScanner()">📷 Iniciar</button>
-<button onclick="stopScanner()">⛔ Stop</button>
-
-<div class="result" id="output">
-Resultado: -
+<!-- ═══════════════════════════════════════════
+     PANTALLA 1 — LOGIN
+════════════════════════════════════════════ -->
+<div id="pantallaLogin" class="card">
+  <div class="header">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <div class="header-text">
+      <h2>POLICÍA</h2>
+      <p>PROVINCIA DE SANTA FE</p>
+      <div class="barra"></div>
+    </div>
+  </div>
+  <label>OPERADOR</label>
+  <select id="desegnableUsuario" onchange="rellenarTextBoxUsuario()">
+    <option value="">⏳ Cargando usuarios...</option>
+  </select>
+  <input type="hidden" id="usuario">
+  <label>CONTRASEÑA</label>
+  <input type="password" id="clave">
+  <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     PANTALLA 2 — FORMULARIO
+════════════════════════════════════════════ -->
+<div id="pantallaFormulario" class="card" hidden>
+  <div class="header">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <div class="header-text">
+      <h2>POLICÍA</h2>
+      <p>PROVINCIA DE SANTA FE</p>
+      <div class="barra"></div>
+    </div>
+  </div>
+
+  <div class="usuario-logueado">
+    👮 Operador: <span id="nombreOperador"></span>
+  </div>
+
+  <!-- Botones de acción -->
+  <div style="display: flex; gap: 10px; margin-top: 15px;">
+
+    <!-- 🔍 ESCANEAR DNI → ahora abre scanner de cámara en tiempo real -->
+    <button class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px;"
+            onclick="abrirScannerDNI()">
+      🔍 ESCANEAR<br>DNI
+    </button>
+
+    <!-- ESCANEAR PATENTE (conservado como imagen, igual que antes) -->
+    <label class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px; text-align: center;">
+      🚘 ESCANEAR<br>PATENTE
+      <input type="file" accept="image/*" capture="environment" style="display: none;">
+    </label>
+
+  </div>
+
+  <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 5px;">
+    <div style="flex: 1;">
+      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;"
+              onclick="ingresarDniManual()">📝 INGRESO<br>DNI</button>
+    </div>
+    <div style="flex: 1;">
+      <button class="btn-externo" style="margin-top: 0; padding: 14px; font-size: 14px;"
+              onclick="ingresarPatenteManual()">📝 INGRESO<br>PATENTE</button>
+    </div>
+  </div>
+
+  <!-- Scanner de cámara en tiempo real (embebido en la misma tarjeta) -->
+  <div id="pantallaScanner">
+    <div id="scannerWrapper">
+      <div id="reader"></div>
+    </div>
+    <div id="scannerStatus">Apunte al código del DNI...</div>
+    <button class="btn-externo btn-clear" id="scannerCancelBtn"
+            style="margin-top: 14px;" onclick="cerrarScanner()">
+      ❌ CANCELAR ESCANEO
+    </button>
+  </div>
+
+  <!-- Formulario de datos -->
+  <div class="formulario-grid">
+
+    <label class="col-izq">DNI *</label>
+    <label class="col-der">PATENTE *</label>
+
+    <input id="dni" class="col-izq" type="text" inputmode="numeric"
+           pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
+    <input id="patente" class="col-der" oninput="forzarMayusculas(this)">
+
+    <label class="col-izq">APELLIDO *</label>
+    <label class="col-der">NOMBRE *</label>
+
+    <input id="apellido" class="col-izq" oninput="forzarMayusculas(this)">
+    <input id="nombre"   class="col-der" oninput="forzarMayusculas(this)">
+
+    <label class="label-completo">FECHA NACIMIENTO *</label>
+    <input id="fechaNacimiento"
+           class="campo-ancho-completo"
+           type="text"
+           placeholder="DD/MM/AAAA"
+           maxlength="10"
+           inputmode="numeric"
+           oninput="aplicarMascaraFecha(this)"
+           onblur="validarFechaReal(this)">
+
+    <label class="label-completo">OBSERVACIONES</label>
+    <textarea id="observacion" class="campo-ancho-completo"
+              oninput="forzarMayusculas(this)"></textarea>
+
+  </div>
+
+  <div id="leyendaError" style="display:none; color:#ffbcbc; background:rgba(193,18,31,0.4);
+       border-radius:10px; padding:10px; text-align:center; font-size:13px;
+       font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
+    ⚠️ Error: Los campos con asterisco (*) son obligatorios.
+  </div>
+
+  <div id="leyendaExito" style="display:none; color:#d1e7dd; background:rgba(14,168,93,0.4);
+       border-radius:10px; padding:10px; text-align:center; font-size:13px;
+       font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
+    ✅ GUARDADO CON ÉXITO
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:25px;">
+    <div style="flex:1;"><button class="btn-save" onclick="obtenerUbicacion()">💾 GUARDAR</button></div>
+    <div style="flex:1;"><button class="btn-clear" onclick="limpiar()">🗑 LIMPIAR</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANTALLA 3 — RESULTADO DE CONTROL
+════════════════════════════════════════════ -->
+<div id="pantallaControl" class="card" hidden>
+  <div class="header">
+    <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1778934793/Easy-Control/ESCUDO4_fpn3hb.png">
+    <div class="header-text">
+      <h2>RESULTADO</h2>
+      <p>CONTROL REALIZADO</p>
+      <div class="barra"></div>
+    </div>
+  </div>
+  <div id="contenidoControl"
+       style="background:white; border-radius:20px; padding:20px;
+              min-height:350px; color:#012b63;"></div>
+  <button class="btn-clear" style="margin-top:20px;" onclick="volverFormulario()">⬅ VOLVER</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
 <script>
-let scanner = null;
-let scanning = false;
-let lastResult = "";
-let audioCtx = null;
 
-function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+/* ── Estado global ── */
+let usuarioActivo  = "";
+let latitudActual  = "";
+let longitudActual = "";
+
+/* ── Scanner ── */
+let scanner       = null;
+let scannerActivo = false;
+let ultimoResult  = "";
+let audioCtx      = null;
+
+/* ─────────────────────────────────────────
+   INICIO — cargar lista de usuarios
+───────────────────────────────────────── */
+window.onload = function(){
+  google.script.run
+    .withSuccessHandler(construirSelectorUsuarios)
+    .obtenerListaUsuarios();
+};
+
+function construirSelectorUsuarios(lista){
+  const select = document.getElementById("desegnableUsuario");
+  select.innerHTML = '<option value="">-- Seleccionar --</option>';
+  lista.forEach(function(u){
+    const opt = document.createElement("option");
+    opt.value = u;
+    opt.text  = u;
+    select.appendChild(opt);
+  });
+}
+
+/* ─────────────────────────────────────────
+   LOGIN
+───────────────────────────────────────── */
+function rellenarTextBoxUsuario(){
+  document.getElementById("usuario").value =
+    document.getElementById("desegnableUsuario").value;
+}
+
+function iniciarSesion(){
+  const user = document.getElementById("usuario").value.trim();
+  const pass = document.getElementById("clave").value.trim();
+  google.script.run.withSuccessHandler(function(res){
+    if(res.valido){
+      usuarioActivo = user;
+      document.getElementById("nombreOperador").innerText = usuarioActivo;
+      document.getElementById("pantallaLogin").hidden      = true;
+      document.getElementById("pantallaFormulario").hidden = false;
+    } else {
+      alert("Usuario o contraseña incorrectos");
     }
+  }).validarCredenciales(user, pass);
 }
 
-function onScanSuccess(decodedText){
-    if(!decodedText || decodedText === lastResult) return;
+/* ─────────────────────────────────────────
+   SCANNER DE CÁMARA EN TIEMPO REAL
+   (reemplaza el input[file] del botón DNI)
+───────────────────────────────────────── */
 
-    // Lógica nueva: Contar cuántos "@" hay en el resultado
-    const countAt = (decodedText.match(/@/g) || []).length;
+function initAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
 
-    lastResult = decodedText;
+function abrirScannerDNI(){
+  limpiar();
+  document.getElementById("pantallaScanner").style.display = "flex";
+  document.getElementById("scannerStatus").innerText = "Iniciando cámara...";
+  iniciarScanner();
+}
 
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerText = "Datos: " + decodedText;
-    
-    outputDiv.classList.add("flash-success");
-    setTimeout(() => outputDiv.classList.remove("flash-success"), 300);
+function cerrarScanner(){
+  detenerScanner();
+  document.getElementById("pantallaScanner").style.display = "none";
+}
 
-    if(navigator.vibrate) navigator.vibrate(120);
-    playBeep();
+async function iniciarScanner(){
+  if(scannerActivo) return;
+  initAudio();
 
-    // Enviar a Google
-    fetch("https://script.google.com/macros/s/AKfycbz1V555JQEXKW2lYQ-eVqWoXLaijVH4bthANLYdhWUzrsgtCkit0rZukCwgNP_9oEz2/exec", {
-        method: "POST",
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo: decodedText })
-    }).catch(err => console.error(err));
+  let devices;
+  try {
+    devices = await Html5Qrcode.getCameras();
+  } catch(e) {
+    document.getElementById("scannerStatus").innerText = "⚠ No se pudo acceder a la cámara.";
+    return;
+  }
 
-    // Si detecta 8 arrobas, detenemos el scanner automáticamente
-    if (countAt >= 8) {
-        console.log("DNI detectado (8+ arrobas). Deteniendo...");
-        outputDiv.innerText = "DNI capturado con éxito:\n" + decodedText;
-        stopScanner(); // Esto detiene la cámara
+  if(!devices || devices.length === 0){
+    document.getElementById("scannerStatus").innerText = "⚠ No se encontró ninguna cámara.";
+    return;
+  }
+
+  /* Preferir cámara trasera */
+  let cameraId = devices[0].id;
+  for(let d of devices){
+    if(d.label.toLowerCase().includes("back") ||
+       d.label.toLowerCase().includes("rear") ||
+       d.label.toLowerCase().includes("trasera")){
+      cameraId = d.id;
+      break;
     }
+  }
+
+  if(!scanner) scanner = new Html5Qrcode("reader");
+
+  const config = {
+    fps: 15,
+    qrbox: { width: 280, height: 180 },
+    aspectRatio: 1.777,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.PDF_417,
+      Html5QrcodeSupportedFormats.CODE_128
+    ]
+  };
+
+  try {
+    await scanner.start(cameraId, config, onScanExito, () => {});
+    scannerActivo = true;
+    ultimoResult  = "";
+    document.getElementById("scannerStatus").innerText = "Apunte al código del DNI...";
+  } catch(e) {
+    document.getElementById("scannerStatus").innerText = "⚠ Error al iniciar la cámara.";
+  }
 }
 
-function onScanFailure(error){}
-
-function playBeep() {
-    try {
-        initAudio();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.08);
-    } catch (e) {}
+function detenerScanner(){
+  if(scanner && scannerActivo){
+    scanner.stop().then(() => {
+      scannerActivo = false;
+      ultimoResult  = "";
+    }).catch(() => { scannerActivo = false; });
+  }
 }
 
-async function startScanner(){
-    if(scanning) return;
+function onScanExito(decodedText){
+  /* Evitar disparos duplicados */
+  if(!decodedText || decodedText === ultimoResult) return;
+  ultimoResult = decodedText;
+
+  /* Feedback: vibración + beep */
+  if(navigator.vibrate) navigator.vibrate(120);
+  playBeep();
+
+  /* Poblar campos del formulario con los datos del DNI */
+  procesarTexto(decodedText);
+
+  /* Cerrar scanner */
+  cerrarScanner();
+
+  /* Capturar ubicación y buscar persona */
+  capturarUbicacionSilenciosa();
+  buscarPersona();
+}
+
+function playBeep(){
+  try{
     initAudio();
-    
-    document.getElementById("output").innerText = "Iniciando...";
-
-    try {
-        const devices = await Html5Qrcode.getCameras();
-        if (!devices || devices.length === 0) return;
-
-        let cameraId = devices[0].id;
-        for (let device of devices) {
-            if (device.label.toLowerCase().includes("back")) {
-                cameraId = device.id;
-                break;
-            }
-        }
-
-        if (!scanner) scanner = new Html5Qrcode("reader");
-
-        scanning = true;
-
-        // CONFIGURACIÓN PARA PDF417 (DNI)
-        const config = {
-            fps: 15,
-            qrbox: { width: 300, height: 200 },
-            aspectRatio: 1.777,
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.PDF_417,
-                Html5QrcodeSupportedFormats.CODE_128
-            ]
-        };
-
-        await scanner.start(cameraId, config, onScanSuccess, onScanFailure);
-        document.getElementById("output").innerText = "Apunte al código del DNI...";
-
-    } catch (err) {
-        scanning = false;
-        document.getElementById("output").innerText = "Error: " + err;
-    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+  } catch(e){}
 }
 
-function stopScanner(){
-    if(scanner && scanning){
-        scanner.stop().then(()=>{
-            scanning = false;
-            lastResult = ""; 
-            document.getElementById("output").innerText = "Scanner detenido";
-        });
-    }
+/* ─────────────────────────────────────────
+   PROCESAMIENTO DE TEXTO DEL DNI
+───────────────────────────────────────── */
+function procesarTexto(texto){
+  const datos = texto.split("@");
+  if(datos.length >= 7){
+    document.getElementById("dni").value            = datos[4].trim();
+    document.getElementById("apellido").value       = datos[1].trim();
+    document.getElementById("nombre").value         = datos[2].trim();
+    document.getElementById("fechaNacimiento").value = datos[6].trim();
+  } else {
+    document.getElementById("dni").value = texto.trim();
+  }
 }
+
+/* ─────────────────────────────────────────
+   INGRESO MANUAL
+───────────────────────────────────────── */
+function ingresarDniManual(){
+  const dniValor = document.getElementById("dni").value.trim();
+  if(dniValor !== ""){
+    capturarUbicacionSilenciosa();
+    buscarPersona();
+  } else {
+    document.getElementById("dni").focus();
+  }
+}
+
+function ingresarPatenteManual(){
+  const patValor = document.getElementById("patente").value.trim();
+  if(patValor !== ""){
+    capturarUbicacionSilenciosa();
+    buscarVehiculo();
+  } else {
+    document.getElementById("patente").focus();
+  }
+}
+
+function detectarEnterDni(event){
+  if(event.key === "Enter"){ event.preventDefault(); ingresarDniManual(); }
+}
+
+function forzarMayusculas(input){
+  if(input.id === "patente"){
+    input.value = input.value.toUpperCase().replace(/\s+/g, '');
+  } else {
+    input.value = input.value.toUpperCase();
+  }
+}
+
+/* ─────────────────────────────────────────
+   GEOLOCALIZACIÓN
+───────────────────────────────────────── */
+function capturarUbicacionSilenciosa(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      latitudActual  = pos.coords.latitude;
+      longitudActual = pos.coords.longitude;
+    }, null, { enableHighAccuracy: true, timeout: 5000 });
+  }
+}
+
+/* ─────────────────────────────────────────
+   BÚSQUEDA EN SHEETS
+───────────────────────────────────────── */
+function buscarPersona(){
+  const dni = document.getElementById("dni").value.trim();
+  document.getElementById("pantallaFormulario").hidden = true;
+  document.getElementById("pantallaControl").hidden    = false;
+  document.getElementById("contenidoControl").innerHTML =
+    `<div style="text-align:center; margin-top:90px;">
+       <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
+       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
+     </div>`;
+  google.script.run
+    .withSuccessHandler(res => { setTimeout(() => { mostrarResultadoControl(res); }, 1200); })
+    .buscarPersonaPorDNI(dni);
+}
+
+function buscarVehiculo(){
+  const patente = document.getElementById("patente").value.trim();
+  document.getElementById("pantallaFormulario").hidden = true;
+  document.getElementById("pantallaControl").hidden    = false;
+  document.getElementById("contenidoControl").innerHTML =
+    `<div style="text-align:center; margin-top:90px;">
+       <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
+       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
+     </div>`;
+  google.script.run
+    .withSuccessHandler(res => { setTimeout(() => { mostrarResultadoControl(res); }, 1200); })
+    .buscarVehiculoPorPatente(patente);
+}
+
+function mostrarResultadoControl(data){
+  const box = document.getElementById("contenidoControl");
+  if(!data.encontrado){
+    box.innerHTML =
+      `<div style="text-align:center; font-size:34px; font-weight:900;
+                   color:#0ea85d; margin-top:100px;">✅ CONTROL NEGATIVO ✅</div>`;
+    return;
+  }
+  const fotoHTML = data.foto
+    ? `<img src="${data.foto}" style="width:100%; border-radius:18px; margin-top:20px;">`
+    : "";
+
+  if(data.tipo === "vehiculo"){
+    box.innerHTML =
+      `<div style="text-align:center; font-size:24px; font-weight:900;
+                   margin-bottom:25px; color:#c1121f;">⚠ CONTROL POSITIVO ⚠</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>PATENTE:</b> ${data.patente}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>MARCA:</b> ${data.marca}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>MODELO:</b> ${data.modelo || ""}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>COLOR:</b> ${data.color || ""}</div>
+       ${fotoHTML}
+       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827;
+                   white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
+  } else {
+    box.innerHTML =
+      `<div style="text-align:center; font-size:24px; font-weight:900;
+                   margin-bottom:25px; color:#c1121f;">⚠ CONTROL POSITIVO ⚠</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>ESTADO:</b> ${data.estado || ""}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>DNI:</b> ${data.dni}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>APELLIDO:</b> ${data.apellido}</div>
+       <div style="font-size:20px;margin-bottom:15px;"><b>NOMBRE:</b> ${data.nombre}</div>
+       ${fotoHTML}
+       <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827;
+                   white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
+  }
+}
+
+function volverFormulario(){
+  document.getElementById("pantallaControl").hidden    = true;
+  document.getElementById("pantallaFormulario").hidden = false;
+}
+
+/* ─────────────────────────────────────────
+   GUARDAR
+───────────────────────────────────────── */
+function obtenerUbicacion(){
+  const dni = document.getElementById("dni").value.trim();
+  const ape = document.getElementById("apellido").value.trim();
+  const nom = document.getElementById("nombre").value.trim();
+  const pat = document.getElementById("patente").value.trim();
+  const fec = document.getElementById("fechaNacimiento").value.trim();
+  const leyError = document.getElementById("leyendaError");
+
+  if(dni==="" || ape==="" || nom==="" || pat==="" || fec===""){
+    leyError.style.display = "block";
+    document.getElementById("leyendaExito").style.display = "none";
+    return;
+  }
+
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  if(!regex.test(fec)){
+    alert("La fecha de nacimiento no está completa o no cumple el formato DD/MM/AAAA");
+    document.getElementById("fechaNacimiento").focus();
+    return;
+  }
+
+  leyError.style.display = "none";
+  enviarAlServer();
+}
+
+function reproducirSonidoExito(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc1  = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.1, ctx.currentTime);
+    osc1.start();
+    osc1.stop(ctx.currentTime + 0.08);
+
+    setTimeout(() => {
+      const osc2  = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(880, ctx.currentTime);
+      gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+      osc2.start();
+      osc2.stop(ctx.currentTime + 0.12);
+    }, 80);
+  } catch(e){}
+}
+
+function enviarAlServer(){
+  const data = {
+    usuario:        usuarioActivo,
+    dni:            document.getElementById("dni").value,
+    apellido:       document.getElementById("apellido").value,
+    nombre:         document.getElementById("nombre").value,
+    fechaNacimiento:document.getElementById("fechaNacimiento").value,
+    patente:        document.getElementById("patente").value,
+    observacion:    document.getElementById("observacion").value,
+    latitud:        latitudActual,
+    longitud:       longitudActual
+  };
+
+  google.script.run.withSuccessHandler(() => {
+    limpiar();
+    reproducirSonidoExito();
+    const leyExito = document.getElementById("leyendaExito");
+    leyExito.style.display = "block";
+    setTimeout(() => { leyExito.style.display = "none"; }, 4000);
+  }).guardarDatos(data);
+}
+
+function limpiar(){
+  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
+    .forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("leyendaError").style.display = "none";
+  latitudActual  = "";
+  longitudActual = "";
+}
+
+/* ─────────────────────────────────────────
+   FECHA — máscara y validación
+───────────────────────────────────────── */
+function aplicarMascaraFecha(input){
+  let v = input.value.replace(/\D/g, '').slice(0, 8);
+  if(v.length >= 5){
+    input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+  } else if(v.length >= 3){
+    input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+  } else {
+    input.value = v;
+  }
+}
+
+function validarFechaReal(input){
+  const valor = input.value;
+  if(valor === "") return true;
+
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  if(!regex.test(valor)){
+    alert("Formato de fecha incorrecto. Debe ser DD/MM/AAAA");
+    input.value = "";
+    return false;
+  }
+
+  const partes = valor.split("/");
+  const dia    = parseInt(partes[0], 10);
+  const mes    = parseInt(partes[1], 10);
+  const anio   = parseInt(partes[2], 10);
+
+  if(mes < 1 || mes > 12 || anio < 1920 || anio > 2030){
+    alert("Fecha inválida. Verifique el mes o el año.");
+    input.value = "";
+    return false;
+  }
+
+  const bisiesto = (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0;
+  const diasPorMes = [31, bisiesto ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if(dia < 1 || dia > diasPorMes[mes - 1]){
+    alert("El día ingresado no corresponde al mes seleccionado.");
+    input.value = "";
+    return false;
+  }
+  return true;
+}
+
 </script>
-
 </body>
 </html>
