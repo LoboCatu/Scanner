@@ -14,6 +14,20 @@
 
 <style>
 
+.pantalla-carga-centrada {
+    position: fixed; /* Se queda fija en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;     /* Centrado horizontal */
+    background: linear-gradient(180deg, #012b63 0%, #023b86 100%); /* Mismo fondo de tu app */
+    z-index: 9999;           /* Que aparezca por encima de todo */
+}
+
 @keyframes rotation {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -720,18 +734,30 @@ function obtenerUbicacion(){
   const fec = document.getElementById("fechaNacimiento").value.trim();
   const leyError = document.getElementById("leyendaError");
 
+  // Validación de campos vacíos
   if(dni==="" || ape==="" || nom==="" || pat==="" || fec===""){
     leyError.style.display = "block";
     document.getElementById("leyendaExito").style.display = "none";
     return;
   }
 
+  // Validación de formato de fecha
   const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
   if(!regex.test(fec)){
     alert("La fecha de nacimiento no está completa o no cumple el formato DD/MM/AAAA");
     document.getElementById("fechaNacimiento").focus();
     return;
   }
+
+  // --- INTEGRACIÓN DEL RELOJ DE ARENA ---
+  // Ocultamos el formulario y mostramos el reloj
+  document.getElementById("pantallaFormulario").style.display = "none";
+  document.getElementById("pantallaCarga").style.display = "block";
+  
+  // Opcional: Cambiar el texto para indicar qué está haciendo
+  document.querySelector("#pantallaCarga div:last-child").innerText = "Guardando información...";
+
+  // Llamamos a la función que hace el fetch
 
   leyError.style.display = "none";
   enviarAlServer(); // Envío directo e inmediato
@@ -765,6 +791,10 @@ function reproducirSonidoExito(){
 }
 
 async function enviarAlServer(){
+  // 1. ANTES DE ENVIAR: Mostrar el reloj y ocultar formulario
+  document.getElementById("pantallaFormulario").style.display = "none";
+  document.getElementById("pantallaCarga").style.display = "block";
+
   const latEnvio = latitudActual;
   const lonEnvio = longitudActual;
 
@@ -779,7 +809,7 @@ async function enviarAlServer(){
     observacion: document.getElementById("observacion").value,
     latitud: latEnvio, 
     longitud: lonEnvio,
-    validacionDNI: document.getElementById("validacionDNI").value,         
+    validacionDNI: document.getElementById("validacionDNI").value,          
     validacionPATENTE: document.getElementById("validacionPATENTE").value   
   };
 
@@ -790,6 +820,10 @@ async function enviarAlServer(){
     });
 
     const resultado = await res.json();
+
+    // 2. AL TERMINAR (ÉXITO O ERROR): Ocultar el reloj y mostrar formulario
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
 
     if(resultado.ok){
       limpiarTodoEfectivo();
@@ -804,6 +838,10 @@ async function enviarAlServer(){
       alert("Error de la API: " + (resultado.error || "No se pudo registrar la información."));
     }
   } catch(e) {
+    // 3. SI HAY ERROR DE RED: Ocultar reloj y mostrar formulario
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
+    
     alert("Error de red. Asegúrese de tener datos móviles o señal de internet estable.");
     console.error(e);
   }
