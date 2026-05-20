@@ -521,7 +521,7 @@ function detenerScanner(){
   }
 }
 
-function onScanExito(decodedText){
+async function onScanExito(decodedText){
 
   /* Evitar disparos duplicados */
   if(!decodedText || decodedText === ultimoResult) return;
@@ -552,7 +552,7 @@ function onScanExito(decodedText){
   cerrarScanner();
 
   /* Capturar ubicación y buscar persona */
-  capturarUbicacionSilenciosa();
+  await capturarUbicacionSilenciosa();
 
   buscarPersona();
 }
@@ -591,20 +591,20 @@ function procesarTexto(texto){
 /* ─────────────────────────────────────────
    INGRESO MANUAL
 ───────────────────────────────────────── */
-function ingresarDniManual(){
+async function ingresarDniManual(){
   const dniValor = document.getElementById("dni").value.trim();
   if(dniValor !== ""){
-    capturarUbicacionSilenciosa();
+    await capturarUbicacionSilenciosa();
     buscarPersona();
   } else {
     document.getElementById("dni").focus();
   }
 }
 
-function ingresarPatenteManual(){
+async function ingresarPatenteManual(){
   const patValor = document.getElementById("patente").value.trim();
   if(patValor !== ""){
-    capturarUbicacionSilenciosa();
+await capturarUbicacionSilenciosa();
     buscarVehiculo();
   } else {
     document.getElementById("patente").focus();
@@ -760,7 +760,7 @@ function volverFormulario(){
 /* ─────────────────────────────────────────
    GUARDAR
 ───────────────────────────────────────── */
-function obtenerUbicacion(){
+async function obtenerUbicacion(){
   const dni = document.getElementById("dni").value.trim();
   const ape = document.getElementById("apellido").value.trim();
   const nom = document.getElementById("nombre").value.trim();
@@ -782,6 +782,7 @@ function obtenerUbicacion(){
   }
 
   leyError.style.display = "none";
+  await capturarUbicacionSilenciosa(); // <--- Agregado await
   enviarAlServer();
 }
 
@@ -815,6 +816,9 @@ function reproducirSonidoExito(){
 
 async function enviarAlServer(){
 
+  const latEnvio = latitudActual;
+  const lonEnvio = longitudActual;
+
   const data = {
     usuario:usuarioActivo,
     dni:document.getElementById("dni").value,
@@ -823,8 +827,8 @@ async function enviarAlServer(){
     fechaNacimiento:document.getElementById("fechaNacimiento").value,
     patente:document.getElementById("patente").value,
     observacion:document.getElementById("observacion").value,
-    latitud:latitudActual,
-    longitud:longitudActual
+    latitud: latEnvio, // <--- Enviamos la constante local segura
+    longitud: lonEnvio // <--- Enviamos la constante local segura
   };
 
   const res = await fetch(API_URL + "?accion=guardar",{
