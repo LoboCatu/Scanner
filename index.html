@@ -439,9 +439,15 @@ function initAudio(){
 
 function abrirScannerDNI(){
   limpiar();
+  
+  // 🚀 AL ESCANEAR: Establece validacionDNI en SI y patente en NO
+  document.getElementById("validacionDNI").value = "SI";
+  document.getElementById("validacionPATENTE").value = "NO";
+
   document.getElementById("pantallaScanner").style.display = "flex";
   document.getElementById("scannerStatus").innerText = "Iniciando cámara...";
   iniciarScanner();
+}rScanner();
 }
 
 function cerrarScanner(){
@@ -565,21 +571,21 @@ function procesarTexto(texto){
    INGRESOS MANUALES (Instantáneos por GPS en Vivo)
 ───────────────────────────────────────── */
 function ingresarDniManual(){
-  const dniValor = document.getElementById("dni").value.trim();
-  if(dniValor !== ""){
-    buscarPersona();
-  } else {
-    document.getElementById("dni").focus();
-  }
+  // 🚀 AL PRESIONAR INGRESO DNI: Activa DNI y apaga PATENTE
+  document.getElementById("validacionDNI").value = "SI";
+  document.getElementById("validacionPATENTE").value = "NO";
+
+  if(document.getElementById("dni").value.trim() !== "") buscarPersona();
+  else document.getElementById("dni").focus();
 }
 
 function ingresarPatenteManual(){
-  const patValor = document.getElementById("patente").value.trim();
-  if(patValor !== ""){
-    buscarVehiculo();
-  } else {
-    document.getElementById("patente").focus();
-  }
+  // 🚀 AL PRESIONAR INGRESO PATENTE: Activa PATENTE y apaga DNI
+  document.getElementById("validacionDNI").value = "NO";
+  document.getElementById("validacionPATENTE").value = "SI";
+
+  if(document.getElementById("patente").value.trim() !== "") buscarVehiculo();
+  else document.getElementById("patente").focus();
 }
 
 function detectarEnterDni(event){
@@ -587,11 +593,8 @@ function detectarEnterDni(event){
 }
 
 function forzarMayusculas(input){
-  if(input.id === "patente"){
-    input.value = input.value.toUpperCase().replace(/\s+/g, '');
-  } else {
-    input.value = input.value.toUpperCase();
-  }
+  if(input.id === "patente") input.value = input.value.toUpperCase().replace(/\s+/g, '');
+  else input.value = input.value.toUpperCase();
 }
 
 /* ─────────────────────────────────────────
@@ -836,3 +839,4 @@ function validarFechaReal(input){
 </script>
 </body>
 </html>
+
