@@ -237,14 +237,12 @@ button:active,
 
 <body>
 
-<!-- LOGIN -->
 <div id="pantallaLogin" class="card">
 
   <div class="header">
     <img
       class="escudo"
       src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1/Easy-Control/ESCUDO4_fpn3hb.png"
-      onerror="this.src='https://cdn-icons-png.flaticon.com/512/2991/2991148.png'"
     >
 
     <div class="header-text">
@@ -276,7 +274,6 @@ button:active,
 
 </div>
 
-<!-- FORMULARIO -->
 <div id="pantallaFormulario" class="card" hidden>
 
   <div class="header">
@@ -284,7 +281,6 @@ button:active,
     <img
       class="escudo"
       src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1/Easy-Control/ESCUDO4_fpn3hb.png"
-      onerror="this.src='https://cdn-icons-png.flaticon.com/512/2991/2991148.png'"
     >
 
     <div class="header-text">
@@ -303,7 +299,7 @@ button:active,
 
     <button
       class="btn-externo"
-      style="flex:1; margin-top:0;"
+      style="flex:1;"
       onclick="abrirScannerDNI()"
     >
       🔍 ESCANEAR<br>DNI
@@ -311,7 +307,7 @@ button:active,
 
     <button
       class="btn-externo"
-      style="flex:1; margin-top:0;"
+      style="flex:1;"
       onclick="ingresarPatenteManual()"
     >
       🚘 BUSCAR<br>PATENTE
@@ -323,7 +319,7 @@ button:active,
 
     <button
       class="btn-externo"
-      style="flex:1; margin-top:0;"
+      style="flex:1;"
       onclick="ingresarDniManual()"
     >
       📝 BUSCAR<br>DNI
@@ -339,7 +335,6 @@ button:active,
 
   </div>
 
-  <!-- SCANNER -->
   <div id="pantallaScanner">
 
     <div id="scannerWrapper">
@@ -360,7 +355,6 @@ button:active,
 
   </div>
 
-  <!-- FORM -->
   <div class="formulario-grid">
 
     <label class="col-izq">DNI *</label>
@@ -405,7 +399,6 @@ button:active,
       maxlength="10"
       inputmode="numeric"
       oninput="aplicarMascaraFecha(this)"
-      onblur="validarFechaReal(this)"
     >
 
     <label class="label-completo">OBSERVACIONES</label>
@@ -436,19 +429,14 @@ button:active,
     ✅ GUARDADO CON ÉXITO
   </div>
 
-  <div style="display:flex; gap:10px; margin-top:25px;">
-
-    <div style="flex:1;">
-      <button class="btn-save" onclick="obtenerUbicacion()">
-        💾 GUARDAR
-      </button>
-    </div>
-
+  <div style="margin-top:25px;">
+    <button class="btn-save" onclick="obtenerUbicacion()">
+      💾 GUARDAR
+    </button>
   </div>
 
 </div>
 
-<!-- RESULTADO -->
 <div id="pantallaControl" class="card" hidden>
 
   <div class="header">
@@ -456,7 +444,6 @@ button:active,
     <img
       class="escudo"
       src="https://res.cloudinary.com/dgrxc4otb/image/upload/v1/Easy-Control/ESCUDO4_fpn3hb.png"
-      onerror="this.src='https://cdn-icons-png.flaticon.com/512/2991/2991148.png'"
     >
 
     <div class="header-text">
@@ -492,99 +479,6 @@ let scannerActivo = false;
 let ultimoResult = "";
 let audioCtx = null;
 
-window.onload = async function(){
-
-  try{
-
-    const res = await fetch(API_URL + "?accion=usuarios",{
-      method:"POST"
-    });
-
-    const data = await res.json();
-
-    construirSelectorUsuarios(data.usuarios || []);
-
-  }catch(e){
-
-    document.getElementById("desegnableUsuario").innerHTML =
-      '<option value="">Error cargando usuarios</option>';
-
-  }
-
-};
-
-function construirSelectorUsuarios(lista){
-
-  const select = document.getElementById("desegnableUsuario");
-
-  select.innerHTML = '<option value="">-- Seleccionar --</option>';
-
-  lista.forEach(function(u){
-
-    const opt = document.createElement("option");
-
-    opt.value = u;
-    opt.text = u;
-
-    select.appendChild(opt);
-
-  });
-
-}
-
-function rellenarTextBoxUsuario(){
-
-  document.getElementById("usuario").value =
-    document.getElementById("desegnableUsuario").value;
-
-}
-
-async function iniciarSesion(){
-
-  const user = document.getElementById("usuario").value.trim();
-  const pass = document.getElementById("clave").value.trim();
-
-  if(user === "" || pass === ""){
-    alert("Complete usuario y contraseña");
-    return;
-  }
-
-  try{
-
-    const res = await fetch(API_URL + "?accion=login",{
-      method:"POST",
-      body:JSON.stringify({
-        usuario:user,
-        clave:pass
-      })
-    });
-
-    const data = await res.json();
-
-    if(data.valido){
-
-      usuarioActivo = user;
-
-      document.getElementById("nombreOperador").innerText = usuarioActivo;
-
-      document.getElementById("pantallaLogin").hidden = true;
-
-      document.getElementById("pantallaFormulario").hidden = false;
-
-    }else{
-
-      alert("Usuario o contraseña incorrectos");
-
-    }
-
-  }catch(e){
-
-    alert("Error de conexión");
-
-  }
-
-}
-
 function initAudio(){
 
   if(!audioCtx){
@@ -602,9 +496,6 @@ function abrirScannerDNI(){
 
   document.getElementById("pantallaScanner").style.display = "flex";
 
-  document.getElementById("scannerStatus").innerText =
-    "Iniciando cámara...";
-
   iniciarScanner();
 
 }
@@ -621,48 +512,11 @@ async function iniciarScanner(){
 
   if(scannerActivo) return;
 
-  initAudio();
+  let devices = await Html5Qrcode.getCameras();
 
-  let devices;
-
-  try{
-
-    devices = await Html5Qrcode.getCameras();
-
-  }catch(e){
-
-    document.getElementById("scannerStatus").innerText =
-      "⚠ No se pudo acceder a la cámara.";
-
-    return;
-
-  }
-
-  if(!devices || devices.length === 0){
-
-    document.getElementById("scannerStatus").innerText =
-      "⚠ No se encontró ninguna cámara.";
-
-    return;
-
-  }
+  if(!devices.length) return;
 
   let cameraId = devices[0].id;
-
-  for(let d of devices){
-
-    const label = d.label.toLowerCase();
-
-    if(
-      label.includes("back") ||
-      label.includes("rear") ||
-      label.includes("trasera")
-    ){
-      cameraId = d.id;
-      break;
-    }
-
-  }
 
   if(!scanner){
 
@@ -670,35 +524,16 @@ async function iniciarScanner(){
 
   }
 
-  try{
+  await scanner.start(
+    cameraId,
+    {
+      fps:15,
+      qrbox:{ width:280, height:180 }
+    },
+    onScanExito
+  );
 
-    await scanner.start(
-      cameraId,
-      {
-        fps:15,
-        qrbox:{ width:280, height:180 },
-        aspectRatio:1.777,
-        formatsToSupport:[
-          Html5QrcodeSupportedFormats.PDF_417,
-          Html5QrcodeSupportedFormats.CODE_128
-        ]
-      },
-      onScanExito
-    );
-
-    scannerActivo = true;
-
-    ultimoResult = "";
-
-    document.getElementById("scannerStatus").innerText =
-      "Apunte al código del DNI...";
-
-  }catch(e){
-
-    document.getElementById("scannerStatus").innerText =
-      "⚠ Error al iniciar la cámara.";
-
-  }
+  scannerActivo = true;
 
 }
 
@@ -706,14 +541,9 @@ function detenerScanner(){
 
   if(scanner && scannerActivo){
 
-    scanner.stop()
-    .then(()=>{
-      scannerActivo = false;
-      ultimoResult = "";
-    })
-    .catch(()=>{
-      scannerActivo = false;
-    });
+    scanner.stop();
+
+    scannerActivo = false;
 
   }
 
@@ -723,55 +553,18 @@ function onScanExito(decodedText){
 
   if(!decodedText || decodedText === ultimoResult) return;
 
-  const cantidadArrobas =
-    (decodedText.match(/@/g) || []).length;
-
-  if(cantidadArrobas !== 8) return;
-
   ultimoResult = decodedText;
-
-  if(navigator.vibrate){
-    navigator.vibrate(120);
-  }
-
-  playBeep();
 
   procesarTexto(decodedText);
 
   cerrarScanner();
 
-  capturarUbicacionSilenciosa();
+  capturarUbicacionSilenciosa()
+  .then(()=>{
 
-  buscarPersona();
+    buscarPersona();
 
-}
-
-function playBeep(){
-
-  try{
-
-    initAudio();
-
-    if(audioCtx.state === "suspended"){
-      audioCtx.resume();
-    }
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.value = 1000;
-
-    gain.gain.value = 0.15;
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-
-    osc.stop(audioCtx.currentTime + 0.08);
-
-  }catch(e){}
+  });
 
 }
 
@@ -793,11 +586,6 @@ function procesarTexto(texto){
     document.getElementById("fechaNacimiento").value =
       datos[6].trim();
 
-  }else{
-
-    document.getElementById("dni").value =
-      texto.trim();
-
   }
 
 }
@@ -815,9 +603,12 @@ function ingresarDniManual(){
 
   }
 
-  capturarUbicacionSilenciosa();
+  capturarUbicacionSilenciosa()
+  .then(()=>{
 
-  buscarPersona();
+    buscarPersona();
+
+  });
 
 }
 
@@ -834,9 +625,12 @@ function ingresarPatenteManual(){
 
   }
 
-  capturarUbicacionSilenciosa();
+  capturarUbicacionSilenciosa()
+  .then(()=>{
 
-  buscarVehiculo();
+    buscarVehiculo();
+
+  });
 
 }
 
@@ -852,22 +646,6 @@ function detectarEnterDni(event){
 
 }
 
-function forzarMayusculas(input){
-
-  if(input.id === "patente"){
-
-    input.value =
-      input.value.toUpperCase().replace(/\s+/g,'');
-
-  }else{
-
-    input.value =
-      input.value.toUpperCase();
-
-  }
-
-}
-
 function capturarUbicacionSilenciosa(){
 
   return new Promise((resolve)=>{
@@ -877,13 +655,14 @@ function capturarUbicacionSilenciosa(){
       resolve();
 
       return;
+
     }
 
     navigator.geolocation.getCurrentPosition(
 
       function(pos){
 
-        latitudActual  = pos.coords.latitude;
+        latitudActual = pos.coords.latitude;
         longitudActual = pos.coords.longitude;
 
         resolve();
@@ -907,195 +686,21 @@ function capturarUbicacionSilenciosa(){
 
 }
 
-function mostrarPantallaCarga(icono){
-
-  document.getElementById("pantallaFormulario").hidden = true;
-
-  document.getElementById("pantallaControl").hidden = false;
-
-  document.getElementById("contenidoControl").innerHTML = `
-    <div class="loading">
-      <div class="loading-icon">${icono}</div>
-      <div class="loading-text">ANALIZANDO...</div>
-    </div>
-  `;
-
-}
-
 function buscarPersona(){
 
-  const dni =
-    document.getElementById("dni").value.trim();
-
-  mostrarPantallaCarga("📄");
-
-  fetch(API_URL + "?accion=buscarPersona",{
-
-    method:"POST",
-
-    body:JSON.stringify({
-      dni:dni
-    })
-
-  })
-  .then(r => r.json())
-  .then(res => {
-
-    setTimeout(()=>{
-      mostrarResultadoControl(res);
-    },1000);
-
-  })
-  .catch(()=>{
-
-    document.getElementById("contenidoControl").innerHTML =
-      "<h2>Error de conexión</h2>";
-
-  });
+  console.log("BUSCANDO PERSONA");
+  console.log(latitudActual, longitudActual);
 
 }
 
 function buscarVehiculo(){
 
-  const patente =
-    document.getElementById("patente").value.trim();
-
-  mostrarPantallaCarga("🚘");
-
-  fetch(API_URL + "?accion=buscarVehiculo",{
-
-    method:"POST",
-
-    body:JSON.stringify({
-      patente:patente
-    })
-
-  })
-  .then(r => r.json())
-  .then(res => {
-
-    setTimeout(()=>{
-      mostrarResultadoControl(res);
-    },1000);
-
-  })
-  .catch(()=>{
-
-    document.getElementById("contenidoControl").innerHTML =
-      "<h2>Error de conexión</h2>";
-
-  });
-
-}
-
-function mostrarResultadoControl(data){
-
-  const box =
-    document.getElementById("contenidoControl");
-
-  if(!data.encontrado){
-
-    box.innerHTML = `
-      <div style="text-align:center; font-size:34px;
-      font-weight:900; color:#0ea85d; margin-top:100px;">
-        ✅CONTROL NEGATIVO✅
-      </div>
-    `;
-
-    return;
-
-  }
-
-  const fotoHTML = data.foto
-    ? `<img class="resultado-foto" src="${data.foto}">`
-    : "";
-
-  if(data.tipo === "vehiculo"){
-
-    box.innerHTML = `
-      <div style="text-align:center; font-size:24px;
-      font-weight:900; margin-bottom:25px; color:#c1121f;">
-        ⚠CONTROL POSITIVO⚠
-      </div>
-
-      <div><b>PATENTE:</b> ${data.patente || ""}</div><br>
-      <div><b>MARCA:</b> ${data.marca || ""}</div><br>
-      <div><b>MODELO:</b> ${data.modelo || ""}</div><br>
-      <div><b>COLOR:</b> ${data.color || ""}</div>
-
-      ${fotoHTML}
-
-      <div style="margin-top:20px; white-space:pre-wrap;">
-        ${data.motivos || ""}
-      </div>
-    `;
-
-  }else{
-
-    box.innerHTML = `
-      <div style="text-align:center; font-size:24px;
-      font-weight:900; margin-bottom:25px; color:#c1121f;">
-        ⚠CONTROL POSITIVO⚠
-      </div>
-
-      <div><b>ESTADO:</b> ${data.estado || ""}</div><br>
-      <div><b>DNI:</b> ${data.dni || ""}</div><br>
-      <div><b>APELLIDO:</b> ${data.apellido || ""}</div><br>
-      <div><b>NOMBRE:</b> ${data.nombre || ""}</div>
-
-      ${fotoHTML}
-
-      <div style="margin-top:20px; white-space:pre-wrap;">
-        ${data.motivos || ""}
-      </div>
-    `;
-
-  }
-
-}
-
-function volverFormulario(){
-
-  document.getElementById("pantallaControl").hidden = true;
-
-  document.getElementById("pantallaFormulario").hidden = false;
+  console.log("BUSCANDO VEHICULO");
+  console.log(latitudActual, longitudActual);
 
 }
 
 function obtenerUbicacion(){
-
-  const dni =
-    document.getElementById("dni").value.trim();
-
-  const ape =
-    document.getElementById("apellido").value.trim();
-
-  const nom =
-    document.getElementById("nombre").value.trim();
-
-  const pat =
-    document.getElementById("patente").value.trim();
-
-  const fec =
-    document.getElementById("fechaNacimiento").value.trim();
-
-  if(
-    dni === "" ||
-    ape === "" ||
-    nom === "" ||
-    pat === "" ||
-    fec === ""
-  ){
-
-    document.getElementById("leyendaError").style.display =
-      "block";
-
-    return;
-
-  }
-
-  document.getElementById("leyendaError").style.display =
-    "none";
 
   enviarAlServer();
 
@@ -1103,88 +708,29 @@ function obtenerUbicacion(){
 
 async function enviarAlServer(){
 
-  try{
+  const data = {
 
-    const data = {
+    usuario:usuarioActivo,
 
-      usuario:usuarioActivo,
+    dni:document.getElementById("dni").value,
 
-      dni:document.getElementById("dni").value,
+    apellido:document.getElementById("apellido").value,
 
-      apellido:document.getElementById("apellido").value,
+    nombre:document.getElementById("nombre").value,
 
-      nombre:document.getElementById("nombre").value,
+    fechaNacimiento:document.getElementById("fechaNacimiento").value,
 
-      fechaNacimiento:document.getElementById("fechaNacimiento").value,
+    patente:document.getElementById("patente").value,
 
-      patente:document.getElementById("patente").value,
+    observacion:document.getElementById("observacion").value,
 
-      observacion:document.getElementById("observacion").value,
+    latitud:latitudActual,
 
-      latitud:latitudActual,
+    longitud:longitudActual
 
-      longitud:longitudActual
+  };
 
-    };
-
-    const res = await fetch(API_URL + "?accion=guardar",{
-
-      method:"POST",
-
-      body:JSON.stringify(data)
-
-    });
-
-    const resultado = await res.json();
-
-    if(resultado.ok){
-
-      limpiar();
-
-      reproducirSonidoExito();
-
-      document.getElementById("leyendaExito").style.display =
-        "block";
-
-      setTimeout(()=>{
-
-        document.getElementById("leyendaExito").style.display =
-          "none";
-
-      },4000);
-
-    }
-
-  }catch(e){
-
-    alert("Error guardando datos");
-
-  }
-
-}
-
-function reproducirSonidoExito(){
-
-  try{
-
-    const ctx =
-      new(window.AudioContext || window.webkitAudioContext)();
-
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-
-    osc1.frequency.value = 587;
-
-    gain1.gain.value = 0.1;
-
-    osc1.start();
-
-    osc1.stop(ctx.currentTime + 0.08);
-
-  }catch(e){}
+  console.log(data);
 
 }
 
@@ -1202,9 +748,6 @@ function limpiar(){
     document.getElementById(id).value = "";
 
   });
-
-  document.getElementById("leyendaError").style.display =
-    "none";
 
 }
 
@@ -1231,26 +774,9 @@ function aplicarMascaraFecha(input){
 
 }
 
-function validarFechaReal(input){
+function forzarMayusculas(input){
 
-  const valor = input.value;
-
-  if(valor === "") return true;
-
-  const regex =
-    /^(\d{2})\/(\d{2})\/(\d{4})$/;
-
-  if(!regex.test(valor)){
-
-    alert("Formato inválido");
-
-    input.value = "";
-
-    return false;
-
-  }
-
-  return true;
+  input.value = input.value.toUpperCase();
 
 }
 
