@@ -13,6 +13,12 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
+
+@keyframes rotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 *{
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -168,6 +174,7 @@ button,
   padding: 10px;
   text-align: center;
   margin-bottom: 15px;
+  display: none !important;
 }
 
 /* ── SCANNER OVERLAY ── */
@@ -217,6 +224,7 @@ button,
 <body>
 
 <div id="pantallaLogin" class="card">
+    
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -236,6 +244,11 @@ button,
    <label>Version 1.12 FUM:20-05-2026</label>
 </div>
 
+    <!-- Pantalla de Carga -->
+<div id="pantallaCarga" style="display:none; text-align:center; padding: 40px 0;">
+    <div style="font-size: 50px; animation: rotation 2s infinite linear; margin-bottom: 15px;">⏳</div>
+    <div style="font-size: 18px; font-weight: bold;">Validando credenciales...</div>
+</div>
 <div id="pantallaFormulario" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -287,25 +300,21 @@ button,
     </button>
   </div>
 
-  <div class="formulario-grid">
-    <label class="col-izq">DNI *</label>
-    <label class="col-der">PATENTE *</label>
-
+<div class="formulario-grid">
+    <label class="col-izq">DNI *</label><label class="col-der">PATENTE *</label>
     <input id="dni" class="col-izq" type="text" inputmode="numeric" pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
     <input id="patente" class="col-der" oninput="forzarMayusculas(this)">
-
-    <label class="col-izq">APELLIDO *</label>
-    <label class="col-der">NOMBRE *</label>
-
+    
+    <label class="col-izq">APELLIDO *</label><label class="col-der">FECHA NACIMIENTO *</label>
     <input id="apellido" class="col-izq" oninput="forzarMayusculas(this)">
-    <input id="nombre" class="col-der" oninput="forzarMayusculas(this)">
-
-    <label class="label-completo">FECHA NACIMIENTO *</label>
-    <input id="fechaNacimiento" class="campo-ancho-completo" type="text" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="aplicarMascaraFecha(this)" onblur="validarFechaReal(this)">
-
+    <input id="fechaNacimiento" class="col-der" type="text" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="aplicarMascaraFecha(this)" onblur="validarFechaReal(this)">
+    
+    <label class="label-completo">NOMBRE *</label>
+    <input id="nombre" class="campo-ancho-completo" oninput="forzarMayusculas(this)">
+    
     <label class="label-completo">OBSERVACIONES</label>
     <textarea id="observacion" class="campo-ancho-completo" oninput="forzarMayusculas(this)"></textarea>
-  </div>
+</div>
 
   <div id="leyendaError" style="display:none; color:#ffbcbc; background:rgba(193,18,31,0.4); border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
     ⚠️ Error: Los campos con asterisco (*) son obligatorios.
@@ -385,6 +394,14 @@ async function iniciarSesion(){
   const user = document.getElementById("usuario").value.trim();
   const pass = document.getElementById("clave").value.trim();
 
+  // --- NUEVO: Mostrar carga ---
+  const pantallaLogin = document.getElementById("pantallaLogin");
+  const pantallaCarga = document.getElementById("pantallaCarga");
+  
+  pantallaLogin.style.display = "none"; // Ocultamos el contenido del login
+  pantallaCarga.style.display = "block"; // Mostramos el reloj
+  // ----------------------------
+
   const res = await fetch(API_URL + "?accion=login",{
     method:"POST",
     body: JSON.stringify({
@@ -398,12 +415,14 @@ async function iniciarSesion(){
   if(data.valido){
     usuarioActivo = user;
     document.getElementById("nombreOperador").innerText = usuarioActivo;
-    document.getElementById("pantallaLogin").hidden = true;
+    pantallaCarga.style.display = "none"; // Ocultamos el reloj
     document.getElementById("pantallaFormulario").hidden = false;
 
-    // 🚀 GPS CONTINUO: Empieza a calcular la ubicación en vivo apenas entra al sistema
     iniciarRastreoGPSContinuo(); 
   } else {
+    // Si falla, volvemos a mostrar el login
+    pantallaCarga.style.display = "none";
+    pantallaLogin.style.display = "block";
     alert("Usuario o contraseña incorrectos");
   }
 }
