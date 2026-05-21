@@ -253,7 +253,7 @@ button,
   </select>
   <input type="hidden" id="usuario">
   <label>CONTRASEÑA</label>
-  <input type="password" id="clave">
+  <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
   <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
    <label>Version 1.12 FUM:20-05-2026</label>
 </div>
