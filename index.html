@@ -405,23 +405,32 @@ function rellenarTextBoxUsuario(){
 }
 
 async function iniciarSesion(){
+  // --- ACTIVAR PANTALLA COMPLETA ---
+  const elem = document.documentElement;
+  try {
+    if (elem.requestFullscreen) {
+      await elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Soporte para Safari/iOS */
+      await elem.webkitRequestFullscreen();
+    }
+  } catch (err) {
+    console.warn("No se pudo activar pantalla completa:", err);
+  }
+  // ----------------------------------
+
   const user = document.getElementById("usuario").value.trim();
   const pass = document.getElementById("clave").value.trim();
 
-  // --- NUEVO: Mostrar carga ---
+  // Mantenemos tu lógica de carga actual
   const pantallaLogin = document.getElementById("pantallaLogin");
   const pantallaCarga = document.getElementById("pantallaCarga");
   
-  pantallaLogin.style.display = "none"; // Ocultamos el contenido del login
-  pantallaCarga.style.display = "block"; // Mostramos el reloj
-  // ----------------------------
+  pantallaLogin.style.display = "none";
+  pantallaCarga.style.display = "block";
 
   const res = await fetch(API_URL + "?accion=login",{
     method:"POST",
-    body: JSON.stringify({
-      usuario:user,
-      clave:pass
-    })
+    body: JSON.stringify({ usuario:user, clave:pass })
   });
 
   const data = await res.json();
@@ -429,12 +438,11 @@ async function iniciarSesion(){
   if(data.valido){
     usuarioActivo = user;
     document.getElementById("nombreOperador").innerText = usuarioActivo;
-    pantallaCarga.style.display = "none"; // Ocultamos el reloj
+    pantallaCarga.style.display = "none";
     document.getElementById("pantallaFormulario").hidden = false;
 
     iniciarRastreoGPSContinuo(); 
   } else {
-    // Si falla, volvemos a mostrar el login
     pantallaCarga.style.display = "none";
     pantallaLogin.style.display = "block";
     alert("Usuario o contraseña incorrectos");
