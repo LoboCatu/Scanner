@@ -238,7 +238,6 @@ button,
 <body>
 
 <div id="pantallaLogin" class="card">
-    
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -255,14 +254,15 @@ button,
   <label>CONTRASEÑA</label>
   <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
   <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
-   <label>Version 1.12 FUM:20-05-2026</label>
+  <label>Version 1.12 FUM:20-05-2026</label>
 </div>
 
-    <!-- Pantalla de Carga -->
-<div id="pantallaCarga" style="display:none; text-align:center; padding: 40px 0;">
-    <div style="font-size: 50px; animation: rotation 2s infinite linear; margin-bottom: 15px;">⏳</div>
-    <div style="font-size: 18px; font-weight: bold;">Validando credenciales...</div>
+<!-- PANTALLA DE CARGA CORREGIDA: CENTRADA AL MEDIO Y CON GIRO CORRECTO DEL RELOJ -->
+<div id="pantallaCarga" style="display: none; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: 100%; max-width: 300px; pointer-events: none;">
+    <div style="display: inline-block; font-size: 50px; animation: rotation 2s infinite linear; margin-bottom: 15px; width: 60px; height: 60px; line-height: 60px; text-align: center;">⏳</div>
+    <div style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
 </div>
+
 <div id="pantallaFormulario" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -318,6 +318,7 @@ button,
     <label class="col-izq">DNI *</label><label class="col-der">PATENTE *</label>
     <input id="dni" class="col-izq" type="text" inputmode="numeric" pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
     <input id="patente" class="col-der" oninput="forzarMayusculas(this)">
+
     
     <label class="col-izq">APELLIDO *</label><label class="col-der">FECHA NACIMIENTO *</label>
     <input id="apellido" class="col-izq" oninput="forzarMayusculas(this)">
