@@ -499,9 +499,6 @@ function abrirScannerDNI(){
   document.getElementById("pantallaFormulario").style.display = "none";
   document.getElementById("pantallaScanner").style.display = "block";
   
-  iniciarScanner(); 
-}
-
 async function iniciarScanner(){
   if(scannerActivo) return;
   initAudio();
@@ -531,23 +528,25 @@ async function iniciarScanner(){
 
   if(!scanner) scanner = new Html5Qrcode("reader");
 
-const config = {
-    fps: 15, // Volvemos a los 15 FPS para mantener buena fluidez en la cámara
-    qrbox: function(viewfinderWidth, viewfinderHeight) {
-      // Hace que el recuadro ocupe el 80% del ancho de la pantalla de forma dinámica
-      let width = Math.floor(viewfinderWidth * 0.8);
-      // Le damos un alto ideal para que entre el código del DNI de punta a punta
-      let height = Math.floor(width * 0.35); 
-      return { width: width, height: height };
-    },
-    aspectRatio: 1.777,
+  // CONFIGURACIÓN ULTRA RÁPIDA: Analiza pantalla completa sin recuadros que traben el renderizado
+  const config = {
+    fps: 20, // Subimos a 20 para capturar movimientos rápidos
+    aspectRatio: 1.333333, // Formato 4:3 estándar que enfoca mucho mejor de cerca
     formatsToSupport: [
-      Html5QrcodeSupportedFormats.PDF_417 // Mantenemos este que es el formato del DNI argentino
+      Html5QrcodeSupportedFormats.PDF_417 // Específico para DNI argentino
     ]
   };
 
   try {
-    await scanner.start(cameraId, config, onScanExito, () => {});
+    // Forzamos al sensor a trabajar en una resolución nativa balanceada (ni muy alta ni muy baja)
+    await scanner.start(
+      cameraId, 
+      config, 
+      onScanExito, 
+      (errorMessage) => {
+        // Silenciamos los errores de log comunes para no saturar la memoria del celular
+      }
+    );
     scannerActivo = true;
     ultimoResult  = "";
     document.getElementById("scannerStatus").innerText = "Apunte al código del DNI...";
