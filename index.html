@@ -635,8 +635,13 @@ function forzarMayusculas(input){
 
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
-  document.getElementById("pantallaFormulario").hidden = true;
-  document.getElementById("pantallaControl").hidden    = false;
+  
+  // Ocultar Formulario
+  document.getElementById("pantallaFormulario").style.display = "none";
+  
+  // Mostrar Control
+  document.getElementById("pantallaControl").style.display = "block";
+  
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
