@@ -384,6 +384,8 @@ let scannerActivo = false;
 let ultimoResult  = "";
 let audioCtx      = null;
 
+let timeoutDNI     = null;  // ⭐ AQUÍ
+
 window.onload = async function(){
   document.getElementById("pantallaScanner").style.display = "none";
   const res = await fetch(API_URL, {
@@ -531,30 +533,43 @@ async function iniciarScanner(){
 
   if(!scanner) scanner = new Html5Qrcode("reader");
 
-const config = {
-  fps: 30,  // ✅ DUPLICAMOS LOS FPS
-  qrbox: { width: 320, height: 200 },  // ✅ CAJA MÁS GRANDE
-  aspectRatio: 1.5,
-  formatsToSupport: [
-    Html5QrcodeSupportedFormats.PDF_417,
-    Html5QrcodeSupportedFormats.CODE_128
-  ],
-  disableFlip: false,  // ✅ PERMITE GIRAR LA CÁMARA
-  rememberLastUsedCamera: true,  // ✅ RECUERDA ÚLTIMA CÁMARA
-  showTorchButtonIfSupported: true  // ✅ BOTÓN DE LINTERNA
-};
+  // ⭐ CONFIGURACIÓN OPTIMIZADA
+  const config = {
+    fps: 30,  // ⭐ CAMBIO: 15 → 30
+    qrbox: { width: 320, height: 200 },  // ⭐ CAMBIO: 280x180 → 320x200
+    aspectRatio: 1.5,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.PDF_417,
+      Html5QrcodeSupportedFormats.CODE_128
+    ],
+    disableFlip: false,  // ⭐ NUEVO
+    rememberLastUsedCamera: true,  // ⭐ NUEVO
+    showTorchButtonIfSupported: true  // ⭐ NUEVO
+  };
 
   try {
     await scanner.start(cameraId, config, onScanExito, () => {});
     scannerActivo = true;
     ultimoResult  = "";
     document.getElementById("scannerStatus").innerText = "Apunte al código del DNI...";
+    
+    // ⭐ NUEVO: TIMEOUT DE 60 SEGUNDOS
+    if(timeoutDNI) clearTimeout(timeoutDNI);
+    timeoutDNI = setTimeout(() => {
+      if(scannerActivo && ultimoResult === "") {
+        alert("⏱️ Tiempo agotado. Intenta:\n✓ Mejor iluminación\n✓ Limpiar la cámara\n✓ Mantener el DNI quieto");
+        cerrarScannerGenerico();
+      }
+    }, 60000);
+    
   } catch(e) {
     document.getElementById("scannerStatus").innerText = "⚠ Error al iniciar la cámara.";
   }
 }
 
 function detenerScanner(){
+  if(timeoutDNI) clearTimeout(timeoutDNI);  // ⭐ NUEVO: LIMPIAR TIMEOUT
+  
   if(scanner && scannerActivo){
     scanner.stop().then(() => {
       scannerActivo = false;
