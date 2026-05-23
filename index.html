@@ -531,12 +531,18 @@ async function iniciarScanner(){
 
   if(!scanner) scanner = new Html5Qrcode("reader");
 
-  const config = {
-    fps: 10,
-    qrbox: { width: 320, height: 180 },
+const config = {
+    fps: 15, // Volvemos a los 15 FPS para mantener buena fluidez en la cámara
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      // Hace que el recuadro ocupe el 80% del ancho de la pantalla de forma dinámica
+      let width = Math.floor(viewfinderWidth * 0.8);
+      // Le damos un alto ideal para que entre el código del DNI de punta a punta
+      let height = Math.floor(width * 0.35); 
+      return { width: width, height: height };
+    },
     aspectRatio: 1.777,
     formatsToSupport: [
-      Html5QrcodeSupportedFormats.PDF_417,
+      Html5QrcodeSupportedFormats.PDF_417 // Mantenemos este que es el formato del DNI argentino
     ]
   };
 
