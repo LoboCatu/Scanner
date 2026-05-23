@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
 <link rel="apple-touch-icon" href="https://res.cloudinary.com/dgrxc4otb/image/upload/v1779304717/Easy-Control/ICONO_ajusbo.jpg">
@@ -13,18 +13,19 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
+
 .pantalla-carga-centrada {
-    position: fixed; 
+    position: fixed; /* Se queda fija en la pantalla */
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center; 
-    align-items: center;     
-    background: linear-gradient(180deg, #012b63 0%, #023b86 100%); 
-    z-index: 9999;           
+    justify-content: center; /* Centrado vertical */
+    align-items: center;     /* Centrado horizontal */
+    background: linear-gradient(180deg, #012b63 0%, #023b86 100%); /* Mismo fondo de tu app */
+    z-index: 9999;           /* Que aparezca por encima de todo */
 }
 
 @keyframes rotation {
@@ -190,20 +191,10 @@ button,
   display: none !important;
 }
 
+/* ── SCANNER OVERLAY ── */
 #pantallaScanner {
-  display: none; 
+  display: none;          /* mostrado con JS */
   flex-direction: column;
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95%;
-  max-width: 440px;
-  z-index: 10000;
-  background: #012b63;
-  padding: 20px;
-  border-radius: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 #scannerWrapper {
@@ -215,10 +206,17 @@ button,
   margin-top: 12px;
 }
 
+/* html5-qrcode inyecta su propio div; lo contenemos */
 #reader {
   width: 100%;
 }
 
+#scannerCancelBtn {
+  margin-top: 14px;
+  background: linear-gradient(180deg, #c1121f 0%, #7b0d14 100%);
+}
+
+/* pequeño mensaje de estado bajo el visor */
 #scannerStatus {
   text-align: center;
   font-size: 13px;
@@ -229,6 +227,7 @@ button,
   color: rgba(255,255,255,0.75);
 }
 
+/* ── animaciones ── */
 @keyframes pulse{
   0%{ transform: scale(1); opacity: 1; }
   50%{ transform: scale(1.15); opacity: 0.6; }
@@ -238,7 +237,6 @@ button,
 </head>
 <body>
 
-<!-- PANTALLA LOGIN -->
 <div id="pantallaLogin" class="card">
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
@@ -259,14 +257,13 @@ button,
   <label>Version 1.12 FUM:20-05-2026</label>
 </div>
 
-<!-- PANTALLA CARGA -->
+<!-- PANTALLA DE CARGA CORREGIDA: CENTRADA AL MEDIO Y CON GIRO CORRECTO DEL RELOJ -->
 <div id="pantallaCarga" style="display: none; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: 100%; max-width: 300px; pointer-events: none;">
     <div style="display: inline-block; font-size: 50px; animation: rotation 2s infinite linear; margin-bottom: 15px; width: 60px; height: 60px; line-height: 60px; text-align: center;">⏳</div>
-    <div id="textoCarga" style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
+    <div style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
 </div>
 
-<!-- PANTALLA FORMULARIO -->
-<div id="pantallaFormulario" class="card" style="display: none;">
+<div id="pantallaFormulario" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -287,9 +284,11 @@ button,
     <button class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px;" onclick="abrirScannerDNI()">
       🔍 ESCANEAR<br>DNI
     </button>
-    <button class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px; text-align: center;" onclick="abrirScannerPatente()">
+
+    <label class="btn-externo" style="flex: 1; margin-top: 0; padding: 14px; font-size: 14px; text-align: center;">
       🚘 ESCANEAR<br>PATENTE
-    </button>
+      <input type="file" accept="image/*" capture="environment" style="display: none;">
+    </label>
   </div>
 
   <div style="display: flex; gap: 10px; margin-top: 10px; margin-bottom: 5px;">
@@ -305,11 +304,22 @@ button,
     </div>
   </div>
 
-  <div class="formulario-grid">
+  <div id="pantallaScanner">
+    <div id="scannerWrapper">
+      <div id="reader"></div>
+    </div>
+    <div id="scannerStatus">Apunte al código del DNI...</div>
+    <button class="btn-externo btn-clear" id="scannerCancelBtn" style="margin-top: 14px;" onclick="cerrarScanner()">
+      ❌ CANCELAR ESCANEO
+    </button>
+  </div>
+
+<div class="formulario-grid">
     <label class="col-izq">DNI *</label><label class="col-der">PATENTE *</label>
     <input id="dni" class="col-izq" type="text" inputmode="numeric" pattern="[0-9]*" onkeydown="detectarEnterDni(event)">
     <input id="patente" class="col-der" oninput="forzarMayusculas(this)">
 
+    
     <label class="col-izq">APELLIDO *</label><label class="col-der">FECHA NACIMIENTO *</label>
     <input id="apellido" class="col-izq" oninput="forzarMayusculas(this)">
     <input id="fechaNacimiento" class="col-der" type="text" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="aplicarMascaraFecha(this)" onblur="validarFechaReal(this)">
@@ -319,7 +329,7 @@ button,
     
     <label class="label-completo">OBSERVACIONES</label>
     <textarea id="observacion" class="campo-ancho-completo" oninput="forzarMayusculas(this)"></textarea>
-  </div>
+</div>
 
   <div id="leyendaError" style="display:none; color:#ffbcbc; background:rgba(193,18,31,0.4); border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:bold; margin-top:15px; border:1px solid rgba(255,255,255,0.2);">
     ⚠️ Error: Los campos con asterisco (*) son obligatorios.
@@ -335,27 +345,7 @@ button,
   </div>
 </div>
 
-<!-- PANTALLA SCANNER -->
-<div id="pantallaScanner">
-  <div class="header">
-    <h2 id="tituloScanner">📸 ESCÁNER</h2>
-  </div>
-  
-  <div id="contenedorViewport" style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:black;">
-     <div id="reader"></div> 
-     <video id="videoPatente" autoplay playsinline style="width:100%; display:none;"></video>
-  </div>
-
-  <div id="scannerStatus" style="text-align:center; font-size:14px; font-weight:700; margin-top:15px; color:white;">...</div>
-
-  <button id="btnCapturarPatente" class="btn-externo" style="background:#0ea85d; display:none; margin-top:15px;" onclick="tomarFotoPatente()">📸 CAPTURAR PATENTE</button>
-  <button class="btn-externo btn-clear" style="margin-top:10px;" onclick="cerrarScannerGenerico()">❌ CANCELAR ESCANEO</button>
-  
-  <canvas id="canvasPatente" style="display:none;"></canvas>
-</div>
-
-<!-- PANTALLA CONTROL RESULTADO -->
-<div id="pantallaControl" class="card" style="display: none;">
+<div id="pantallaControl" class="card" hidden>
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -370,44 +360,31 @@ button,
 
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxHXImBY4yjON3xmFGgPZQbpU_MsySDGrGOlbSlY9dfa8yqp6Lw90DQRVsxkmSn6eIbQA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyAXFeZR8J6XdVgYwPWn8CLkjMYWFRQNNcT3q9J-jRzAVNRHAlWVj0r8vyE4QGWEls/exec";
 
+/* ── Estado global ── */
 let usuarioActivo  = "";
 let latitudActual  = "";
 let longitudActual = "";
-let idRelojGPS     = null;
+let idRelojGPS     = null; // Guarda el ID del rastreador continuo en vivo
 
+/* ── Scanner ── */
 let scanner       = null;
 let scannerActivo = false;
 let ultimoResult  = "";
 let audioCtx      = null;
 
+/* ─────────────────────────────────────────
+   INICIO — cargar lista de usuarios
+───────────────────────────────────────── */
 window.onload = async function(){
-  document.getElementById("pantallaScanner").style.display = "none";
   const res = await fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({ accion: "usuarios" })
   });
-  
   const data = await res.json();
   construirSelectorUsuarios(data.usuarios);
 };
-
-// --- FUNCIÓN MAESTRA DE NAVEGACIÓN GLOBAL ---
-function cambiarPantalla(pantallaId) {
-    document.getElementById("pantallaLogin").style.display = "none";
-    document.getElementById("pantallaCarga").style.display = "none";
-    document.getElementById("pantallaFormulario").style.display = "none";
-    document.getElementById("pantallaScanner").style.display = "none";
-    document.getElementById("pantallaControl").style.display = "none";
-    
-    const target = document.getElementById(pantallaId);
-    if(pantallaId === "pantallaScanner"){
-      target.style.display = "flex";
-    } else {
-      target.style.display = "block";
-    }
-}
 
 function construirSelectorUsuarios(lista){
   const select = document.getElementById("desegnableUsuario");
@@ -420,24 +397,37 @@ function construirSelectorUsuarios(lista){
   });
 }
 
+/* ─────────────────────────────────────────
+   LOGIN & ACTIVACIÓN GPS EN TIEMPO REAL
+───────────────────────────────────────── */
 function rellenarTextBoxUsuario(){
-  document.getElementById("usuario").value = document.getElementById("desegnableUsuario").value;
+  document.getElementById("usuario").value =
+    document.getElementById("desegnableUsuario").value;
 }
 
 async function iniciarSesion(){
+  // --- ACTIVAR PANTALLA COMPLETA ---
   const elem = document.documentElement;
   try {
-    if (elem.requestFullscreen) { await elem.requestFullscreen(); }
-    else if (elem.webkitRequestFullscreen) { await elem.webkitRequestFullscreen(); }
+    if (elem.requestFullscreen) {
+      await elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Soporte para Safari/iOS */
+      await elem.webkitRequestFullscreen();
+    }
   } catch (err) {
     console.warn("No se pudo activar pantalla completa:", err);
   }
+  // ----------------------------------
 
   const user = document.getElementById("usuario").value.trim();
   const pass = document.getElementById("clave").value.trim();
 
-  document.getElementById("textoCarga").innerText = "Validando credenciales...";
-  cambiarPantalla("pantallaCarga");
+  // Mantenemos tu lógica de carga actual
+  const pantallaLogin = document.getElementById("pantallaLogin");
+  const pantallaCarga = document.getElementById("pantallaCarga");
+  
+  pantallaLogin.style.display = "none";
+  pantallaCarga.style.display = "block";
 
   const res = await fetch(API_URL + "?accion=login",{
     method:"POST",
@@ -449,37 +439,49 @@ async function iniciarSesion(){
   if(data.valido){
     usuarioActivo = user;
     document.getElementById("nombreOperador").innerText = usuarioActivo;
-    cambiarPantalla("pantallaFormulario");
+    pantallaCarga.style.display = "none";
+    document.getElementById("pantallaFormulario").hidden = false;
+
     iniciarRastreoGPSContinuo(); 
   } else {
-    cambiarPantalla("pantallaLogin");
+    pantallaCarga.style.display = "none";
+    pantallaLogin.style.display = "block";
     alert("Usuario o contraseña incorrectos");
   }
 }
 
+/* ─────────────────────────────────────────
+   SISTEMA DE SEGUIMIENTO GPS CONTINUO
+───────────────────────────────────────── */
 function iniciarRastreoGPSContinuo() {
   if (!navigator.geolocation) {
     console.warn("El navegador o dispositivo no soporta Geolocalización.");
     return;
   }
-  if (idRelojGPS !== null) return; 
+  if (idRelojGPS !== null) return; // Evita duplicar tareas en segundo plano
+
+  console.log("🚀 Rastreador GPS Activo");
 
   idRelojGPS = navigator.geolocation.watchPosition(
     function(pos) {
       latitudActual  = pos.coords.latitude;
       longitudActual = pos.coords.longitude;
+      console.log("📍 Coordenadas refrescadas en vivo:", latitudActual, longitudActual);
     },
     function(error) {
       console.warn("⚠️ Advertencia del módulo GPS:", error.message);
     },
     {
-      enableHighAccuracy: true, 
-      timeout: 10000,           
-      maximumAge: 0             
+      enableHighAccuracy: true, // Solicita el hardware de GPS dedicado (alta precisión)
+      timeout: 10000,           // Margen de espera si la señal decae en zona rural
+      maximumAge: 0             // Exige coordenadas frescas del satélite, sin caché viejo
     }
   );
 }
 
+/* ─────────────────────────────────────────
+   SCANNER DE CÁMARA EN TIEMPO REAL
+───────────────────────────────────────── */
 function initAudio(){
   if(!audioCtx){
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -487,20 +489,21 @@ function initAudio(){
 }
 
 function abrirScannerDNI(){
+  // Limpia textos de inputs, pero preserva el estado para la consulta entrante
   ["dni","apellido","nombre","fechaNacimiento","patente","observacion"].forEach(id => { document.getElementById(id).value = ""; });
   
+  // 🚀 AL ESCANEAR: Establece validacionDNI en SI y patente en NO
   document.getElementById("validacionDNI").value = "SI";
   document.getElementById("validacionPATENTE").value = "NO";
 
-  document.getElementById("tituloScanner").innerText = "📸 LECTOR DNI";
-  document.getElementById("scannerStatus").innerText = "Apunte al código del DNI...";
-  
-  document.getElementById("reader").style.display = "block";
-  document.getElementById("videoPatente").style.display = "none";
-  document.getElementById("btnCapturarPatente").style.display = "none";
+  document.getElementById("pantallaScanner").style.display = "flex";
+  document.getElementById("scannerStatus").innerText = "Iniciando cámara...";
+  iniciarScanner();
+}
 
-  cambiarPantalla("pantallaScanner");
-  iniciarScanner(); 
+function cerrarScanner(){
+  detenerScanner();
+  document.getElementById("pantallaScanner").style.display = "none";
 }
 
 async function iniciarScanner(){
@@ -508,8 +511,9 @@ async function iniciarScanner(){
   initAudio();
 
   let devices;
-  try { devices = await Html5Qrcode.getCameras(); } 
-  catch(e) {
+  try {
+    devices = await Html5Qrcode.getCameras();
+  } catch(e) {
     document.getElementById("scannerStatus").innerText = "⚠ No se pudo acceder a la cámara.";
     return;
   }
@@ -519,9 +523,12 @@ async function iniciarScanner(){
     return;
   }
 
+  /* Preferir cámara trasera */
   let cameraId = devices[0].id;
   for(let d of devices){
-    if(d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear") || d.label.toLowerCase().includes("trasera")){
+    if(d.label.toLowerCase().includes("back") ||
+       d.label.toLowerCase().includes("rear") ||
+       d.label.toLowerCase().includes("trasera")){
       cameraId = d.id;
       break;
     }
@@ -561,6 +568,7 @@ function detenerScanner(){
 async function onScanExito(decodedText){
   if(!decodedText || decodedText === ultimoResult) return;
 
+  /* VALIDAR DNI ARGENTINO */
   const cantidadArrobas = (decodedText.match(/@/g) || []).length;
   if(cantidadArrobas <= 7){
     console.log("Código inválido");
@@ -568,11 +576,14 @@ async function onScanExito(decodedText){
   }
 
   ultimoResult = decodedText;
+
   if(navigator.vibrate) navigator.vibrate(120);
   playBeep();
 
   procesarTexto(decodedText);
-  cerrarScannerGenerico();
+  cerrarScanner();
+
+  /* ⚡ INSTANTÁNEO: Al estar el GPS activo continuamente, las coordenadas ya están listas */
   buscarPersona();
 }
 
@@ -592,6 +603,9 @@ function playBeep(){
   } catch(e){}
 }
 
+/* ─────────────────────────────────────────
+   PROCESAMIENTO DE TEXTO DEL DNI
+───────────────────────────────────────── */
 function procesarTexto(texto){
   const datos = texto.split("@");
   if(datos.length >= 7){
@@ -604,16 +618,23 @@ function procesarTexto(texto){
   }
 }
 
+/* ─────────────────────────────────────────
+   INGRESOS MANUALES (Instantáneos por GPS en Vivo)
+───────────────────────────────────────── */
 function ingresarDniManual(){
+  // 🚀 AL PRESIONAR INGRESO DNI: Activa DNI y apaga PATENTE
   document.getElementById("validacionDNI").value = "SI";
   document.getElementById("validacionPATENTE").value = "NO";
+
   if(document.getElementById("dni").value.trim() !== "") buscarPersona();
   else document.getElementById("dni").focus();
 }
 
 function ingresarPatenteManual(){
-  document.getElementById("validacionPATENTE").value = "SI";
+  // 🚀 AL PRESIONAR INGRESO PATENTE: Activa PATENTE y apaga DNI
   document.getElementById("validacionDNI").value = "NO";
+  document.getElementById("validacionPATENTE").value = "SI";
+
   if(document.getElementById("patente").value.trim() !== "") buscarVehiculo();
   else document.getElementById("patente").focus();
 }
@@ -627,10 +648,13 @@ function forzarMayusculas(input){
   else input.value = input.value.toUpperCase();
 }
 
+/* ─────────────────────────────────────────
+   BÚSQUEDAS EN GOOGLE SHEETS
+───────────────────────────────────────── */
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
-  cambiarPantalla("pantallaControl");
-  
+  document.getElementById("pantallaFormulario").hidden = true;
+  document.getElementById("pantallaControl").hidden    = false;
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
@@ -643,14 +667,16 @@ function buscarPersona(){
   })
   .then(r=>r.json())
   .then(res=>{
-    setTimeout(()=>{ mostrarResultadoControl(res); },1200);
+    setTimeout(()=>{
+      mostrarResultadoControl(res);
+    },1200);
   });
 }
 
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
-  cambiarPantalla("pantallaControl");
-
+  document.getElementById("pantallaFormulario").hidden = true;
+  document.getElementById("pantallaControl").hidden    = false;
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
@@ -663,17 +689,22 @@ function buscarVehiculo(){
   })
   .then(r=>r.json())
   .then(res=>{
-    setTimeout(()=>{ mostrarResultadoControl(res); },1200);
+    setTimeout(()=>{
+      mostrarResultadoControl(res);
+    },1200);
   });
 }
 
 function mostrarResultadoControl(data){
   const box = document.getElementById("contenidoControl");
   if(!data.encontrado){
-    box.innerHTML = `<div style="text-align:center; font-size:34px; font-weight:900; color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
+    box.innerHTML =
+      `<div style="text-align:center; font-size:34px; font-weight:900; color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
     return;
   }
-  const fotoHTML = data.foto ? `<img src="${data.foto}" style="width:100%; border-radius:18px; margin-top:20px;">` : "";
+  const fotoHTML = data.foto
+    ? `<img src="${data.foto}" style="width:100%; border-radius:18px; margin-top:20px;">`
+    : "";
 
   if(data.tipo === "vehiculo"){
     box.innerHTML =
@@ -697,9 +728,13 @@ function mostrarResultadoControl(data){
 }
 
 function volverFormulario(){
-  cambiarPantalla("pantallaFormulario");
+  document.getElementById("pantallaControl").hidden    = true;
+  document.getElementById("pantallaFormulario").hidden = false;
 }
 
+/* ─────────────────────────────────────────
+   GUARDAR DATOS EN LA HOJA DE EXCEL
+───────────────────────────────────────── */
 function obtenerUbicacion(){
   const dni = document.getElementById("dni").value.trim();
   const ape = document.getElementById("apellido").value.trim();
@@ -708,12 +743,14 @@ function obtenerUbicacion(){
   const fec = document.getElementById("fechaNacimiento").value.trim();
   const leyError = document.getElementById("leyendaError");
 
+  // Validación de campos vacíos
   if(dni==="" || ape==="" || nom==="" || pat==="" || fec===""){
     leyError.style.display = "block";
     document.getElementById("leyendaExito").style.display = "none";
     return;
   }
 
+  // Validación de formato de fecha
   const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
   if(!regex.test(fec)){
     alert("La fecha de nacimiento no está completa o no cumple el formato DD/MM/AAAA");
@@ -721,11 +758,18 @@ function obtenerUbicacion(){
     return;
   }
 
-  document.getElementById("textoCarga").innerText = "Guardando información...";
-  cambiarPantalla("pantallaCarga");
+  // --- INTEGRACIÓN DEL RELOJ DE ARENA ---
+  // Ocultamos el formulario y mostramos el reloj
+  document.getElementById("pantallaFormulario").style.display = "none";
+  document.getElementById("pantallaCarga").style.display = "block";
+  
+  // Opcional: Cambiar el texto para indicar qué está haciendo
+  document.querySelector("#pantallaCarga div:last-child").innerText = "Guardando información...";
+
+  // Llamamos a la función que hace el fetch
 
   leyError.style.display = "none";
-  enviarAlServer();
+  enviarAlServer(); // Envío directo e inmediato
 }
 
 function reproducirSonidoExito(){
@@ -756,6 +800,13 @@ function reproducirSonidoExito(){
 }
 
 async function enviarAlServer(){
+  // 1. ANTES DE ENVIAR: Mostrar el reloj y ocultar formulario
+  document.getElementById("pantallaFormulario").style.display = "none";
+  document.getElementById("pantallaCarga").style.display = "block";
+
+  const latEnvio = latitudActual;
+  const lonEnvio = longitudActual;
+
   const data = {
     accion: "guardar", 
     usuario: usuarioActivo,
@@ -765,8 +816,8 @@ async function enviarAlServer(){
     fechaNacimiento: document.getElementById("fechaNacimiento").value,
     patente: document.getElementById("patente").value,
     observacion: document.getElementById("observacion").value,
-    latitud: latitudActual, 
-    longitud: longitudActual,
+    latitud: latEnvio, 
+    longitud: lonEnvio,
     validacionDNI: document.getElementById("validacionDNI").value,          
     validacionPATENTE: document.getElementById("validacionPATENTE").value   
   };
@@ -778,41 +829,61 @@ async function enviarAlServer(){
     });
 
     const resultado = await res.json();
-    cambiarPantalla("pantallaFormulario");
+
+    // 2. AL TERMINAR (ÉXITO O ERROR): Ocultar el reloj y mostrar formulario
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
 
     if(resultado.ok){
       limpiarTodoEfectivo();
       reproducirSonidoExito();
       const leyExito = document.getElementById("leyendaExito");
       leyExito.style.display = "block";
-      setTimeout(()=>{ leyExito.style.display = "none"; }, 4000);
+
+      setTimeout(()=>{
+        leyExito.style.display = "none";
+      }, 4000);
     } else {
       alert("Error de la API: " + (resultado.error || "No se pudo registrar la información."));
     }
   } catch(e) {
-    cambiarPantalla("pantallaFormulario");
+    // 3. SI HAY ERROR DE RED: Ocultar reloj y mostrar formulario
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
+    
     alert("Error de red. Asegúrese de tener datos móviles o señal de internet estable.");
     console.error(e);
   }
 }
 
+// Limpieza total post-guardado exitoso en servidor
 function limpiarTodoEfectivo(){
-  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"].forEach(id => { document.getElementById(id).value = ""; });
+  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
+    .forEach(id => { document.getElementById(id).value = ""; });
   document.getElementById("validacionDNI").value = "NO";
   document.getElementById("validacionPATENTE").value = "NO";
   document.getElementById("leyendaError").style.display = "none";
 }
 
+// Acción del botón limpiar manual (Preserva las banderas por si va a re-ejecutar búsquedas)
 function limpiarManual(){
-  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"].forEach(id => { document.getElementById(id).value = ""; });
+  ["dni","apellido","nombre","fechaNacimiento","patente","observacion"]
+    .forEach(id => { document.getElementById(id).value = ""; });
   document.getElementById("leyendaError").style.display = "none";
 }
 
+/* ─────────────────────────────────────────
+   FECHA — máscara y validación
+───────────────────────────────────────── */
 function aplicarMascaraFecha(input){
   let v = input.value.replace(/\D/g, '').slice(0, 8);
-  if(v.length >= 5){ input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`; } 
-  else if(v.length >= 3){ input.value = `${v.slice(0,2)}/${v.slice(2)}`; } 
-  else { input.value = v; }
+  if(v.length >= 5){
+    input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+  } else if(v.length >= 3){
+    input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+  } else {
+    input.value = v;
+  }
 }
 
 function validarFechaReal(input){
@@ -845,81 +916,6 @@ function validarFechaReal(input){
     return false;
   }
   return true;
-}
-
-async function abrirScannerPatente() {
-  document.getElementById("tituloScanner").innerText = "📸 LECTOR PATENTE";
-  document.getElementById("scannerStatus").innerText = "Apunte a la patente...";
-  
-  document.getElementById("reader").style.display = "none";
-  document.getElementById("videoPatente").style.display = "block";
-  document.getElementById("btnCapturarPatente").style.display = "block";
-
-  cambiarPantalla("pantallaScanner");
-  
-  const video = document.getElementById('videoPatente');
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    video.srcObject = stream;
-  } catch (err) {
-    console.error("Error al acceder a la cámara:", err);
-    alert("No se pudo acceder a la cámara. Verifique los permisos.");
-    cerrarScannerGenerico(); 
-  }
-}
-
-async function tomarFotoPatente() {
-  const video = document.getElementById('videoPatente');
-  const canvas = document.getElementById('canvasPatente');
-  const ctx = canvas.getContext('2d');
-  
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-  const base64Image = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-
-  document.getElementById("textoCarga").innerText = "Analizando patente...";
-  cambiarPantalla("pantallaCarga");
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ accion: "analizarPatente", image: base64Image })
-    });
-    const data = await res.json();
-    
-    cambiarPantalla("pantallaFormulario");
-
-    if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
-    }
-
-    if(data.ok) {
-      document.getElementById("patente").value = data.patente;
-      document.getElementById("validacionPATENTE").value = "SI";
-      document.getElementById("validacionDNI").value = "NO";
-      buscarVehiculo();
-    } else {
-      alert("No se pudo leer la patente: " + data.error);
-      cambiarPantalla("pantallaScanner");
-    }
-  } catch (e) {
-    cambiarPantalla("pantallaFormulario");
-    alert("Error de conexión al enviar la foto.");
-  }
-}
-
-function cerrarScannerGenerico() {
-  const video = document.getElementById('videoPatente');
-  if (video && video.srcObject) {
-    video.srcObject.getTracks().forEach(track => track.stop());
-  }
-    
-  detenerScanner();
-  cambiarPantalla("pantallaFormulario");
 }
 </script>
 </body>
