@@ -531,15 +531,18 @@ async function iniciarScanner(){
 
   if(!scanner) scanner = new Html5Qrcode("reader");
 
-  const config = {
-    fps: 15,
-    qrbox: { width: 280, height: 180 },
-    aspectRatio: 1.777,
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.PDF_417,
-      Html5QrcodeSupportedFormats.CODE_128
-    ]
-  };
+const config = {
+  fps: 30,  // ✅ DUPLICAMOS LOS FPS
+  qrbox: { width: 320, height: 200 },  // ✅ CAJA MÁS GRANDE
+  aspectRatio: 1.5,
+  formatsToSupport: [
+    Html5QrcodeSupportedFormats.PDF_417,
+    Html5QrcodeSupportedFormats.CODE_128
+  ],
+  disableFlip: false,  // ✅ PERMITE GIRAR LA CÁMARA
+  rememberLastUsedCamera: true,  // ✅ RECUERDA ÚLTIMA CÁMARA
+  showTorchButtonIfSupported: true  // ✅ BOTÓN DE LINTERNA
+};
 
   try {
     await scanner.start(cameraId, config, onScanExito, () => {});
