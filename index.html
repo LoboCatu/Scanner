@@ -273,7 +273,7 @@ button,
     <div style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
 </div>
 
-<div id="pantallaFormulario" class="card">
+<div id="pantallaFormulario" class="card pantalla-oculta">
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -434,30 +434,45 @@ async function iniciarSesion(){
   const pantallaLogin = document.getElementById("pantallaLogin");
   const pantallaCarga = document.getElementById("pantallaCarga");
   
-  pantallaLogin.style.display = "none";
+  // 1. Ocultamos el Login usando la nueva clase y encendemos el reloj de arena
+  pantallaLogin.classList.add("pantalla-oculta");
   pantallaCarga.style.display = "block";
 
-  const res = await fetch(API_URL + "?accion=login",{
-    method:"POST",
-    body: JSON.stringify({ usuario:user, clave:pass })
-  });
+  try {
+    const res = await fetch(API_URL + "?accion=login",{
+      method:"POST",
+      body: JSON.stringify({ usuario:user, clave:pass })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if(data.valido){
-    usuarioActivo = user;
-    document.getElementById("nombreOperador").innerText = usuarioActivo;
+    if(data.valido){
+      usuarioActivo = user;
+      document.getElementById("nombreOperador").innerText = usuarioActivo;
+      
+      // 2. Dejamos el reloj de arena un momento y hacemos la transición limpia al formulario
+      setTimeout(() => {
+        pantallaCarga.style.display = "none";
+        // CORRECCIÓN: Mostramos el formulario quitando la clase estricta
+        document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
+        
+        iniciarRastreoGPSContinuo(); 
+      }, 1000); // 1 segundo de retraso con el reloj de arena para que sea fluido
+      
+    } else {
+      // Si la clave falla, apagamos carga y volvemos a mostrar el Login quitando la clase
+      pantallaCarga.style.display = "none";
+      pantallaLogin.classList.remove("pantalla-oculta");
+      alert("Usuario o contraseña incorrectos");
+    }
+  } catch (e) {
+    // Manejo de error por si falla la red en la calle
     pantallaCarga.style.display = "none";
-    document.getElementById("pantallaFormulario").hidden = false;
-
-    iniciarRastreoGPSContinuo(); 
-  } else {
-    pantallaCarga.style.display = "none";
-    pantallaLogin.style.display = "block";
-    alert("Usuario o contraseña incorrectos");
+    pantallaLogin.classList.remove("pantalla-oculta");
+    alert("Error de conexión al validar las credenciales.");
+    console.error(e);
   }
 }
-
 function iniciarRastreoGPSContinuo() {
   if (!navigator.geolocation) {
     console.warn("El navegador o dispositivo no soporta Geolocalización.");
