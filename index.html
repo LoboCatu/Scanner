@@ -655,10 +655,14 @@ function forzarMayusculas(input){
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
   
-  // CORRECCIÓN: Ocultar el formulario y mostrar el control usando la clase estricta
+  // 1. Vaciamos el contenedor por completo para que no quede nada viejo pegado
+  document.getElementById("contenidoControl").innerHTML = "";
+  
+  // 2. Apagamos el formulario y encendemos la pantalla de control
   document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
   document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
   
+  // 3. Inyectamos la animación de análisis
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
@@ -685,10 +689,14 @@ function volverFormulario(){
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
   
-  // CORRECCIÓN: Ocultar el formulario por completo y mostrar la pantalla de control de forma estricta
+  // 1. Vaciamos el contenedor por completo antes de arrancar
+  document.getElementById("contenidoControl").innerHTML = "";
+  
+  // 2. Hacemos el cambio de pantallas con las clases estrictas
   document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
   document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
   
+  // 3. Inyectamos la animación de verificación
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">🚗</div>
