@@ -684,12 +684,15 @@ function volverFormulario(){
 }
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
-  document.getElementById("pantallaFormulario").hidden = true;
-  document.getElementById("pantallaControl").hidden    = false;
+  
+  // CORRECCIÓN: Ocultar el formulario por completo y mostrar la pantalla de control de forma estricta
+  document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
+  document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
+  
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
-       <div style="font-size:70px; animation:pulse 1s infinite;">🚘</div>
-       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
+       <div style="font-size:70px; animation:pulse 1s infinite;">🚗</div>
+       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">VERIFICANDO PATENTE...</div>
      </div>`;
 
   fetch(API_URL + "?accion=buscarVehiculo",{
