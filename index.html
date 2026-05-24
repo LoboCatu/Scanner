@@ -709,15 +709,20 @@ function buscarVehiculo(){
 
 function mostrarResultadoControl(data){
   const box = document.getElementById("contenidoControl");
+  
+  // Si no se encuentra en la base de datos (Control Negativo)
   if(!data.encontrado){
     box.innerHTML =
       `<div style="text-align:center; font-size:34px; font-weight:900; color:#0ea85d; margin-top:100px;">✅CONTROL NEGATIVO✅</div>`;
     return;
   }
+  
+  // Si se encuentra (Control Positivo), preparamos la foto si existe
   const fotoHTML = data.foto
     ? `<img src="${data.foto}" style="width:100%; border-radius:18px; margin-top:20px;">`
     : "";
 
+  // Estructura limpia para Vehículo
   if(data.tipo === "vehiculo"){
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
@@ -727,7 +732,9 @@ function mostrarResultadoControl(data){
        <div style="font-size:20px;margin-bottom:15px;"><b>COLOR:</b> ${data.color || ""}</div>
        ${fotoHTML}
        <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827; white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
-  } else {
+  } 
+  // Estructura limpia para Persona
+  else {
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
        <div style="font-size:20px;margin-bottom:15px;"><b>ESTADO:</b> ${data.estado || ""}</div>
