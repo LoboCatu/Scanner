@@ -1004,16 +1004,19 @@ async function tomarFotoPatente() {
     
     document.getElementById("pantallaCarga").style.display = "none";
     document.getElementById("pantallaFormulario").style.display = "block";
-
+    
     if (video.srcObject) {
       video.srcObject.getTracks().forEach(track => track.stop());
     }
 
     if(data.ok) {
-      document.getElementById("patente").value = data.patente;
+      // AQUÍ SE ASIGNA EL RESULTADO AL TEXTBOX
+      document.getElementById("patente").value = data.patente; 
       document.getElementById("validacionPATENTE").value = "SI";
       document.getElementById("validacionDNI").value = "NO";
-      buscarVehiculo();
+      
+      // Llamamos a la función de búsqueda automáticamente
+      buscarVehiculo(); 
     } else {
       alert("No se pudo leer la patente: " + data.error);
       document.getElementById("pantallaScanner").style.display = "block";
