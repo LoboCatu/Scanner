@@ -655,29 +655,48 @@ function forzarMayusculas(input){
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
   
-  // 1. Vaciamos el contenedor por completo para que no quede nada viejo pegado
-  document.getElementById("contenidoControl").innerHTML = "";
+  if(!dni) {
+    alert("Por favor, ingrese o escanee un DNI primero.");
+    return;
+  }
   
-  // 2. Apagamos el formulario y encendemos la pantalla de control
+  // Limpieza inicial estricta
+  document.getElementById("contenidoControl").innerHTML = "";
   document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
   document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
   
-  // 3. Inyectamos la animación de análisis
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
-       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO...</div>
+       <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO DNI...</div>
      </div>`;
 
-  fetch(API_URL + "?accion=buscarPersona",{
-    method:"POST",
-    body: JSON.stringify({ dni:dni })
+  // Agregamos un timestamp para obligar al servidor a no usar caché vieja
+  const url = API_URL + "?accion=buscarPersona&_t=" + Date.now();
+
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({ dni: dni })
   })
-  .then(r=>r.json())
-  .then(res=>{
-    setTimeout(()=>{
+  .then(r => {
+    if(!r.ok) throw new Error("Error en la respuesta del servidor: " + r.status);
+    return r.json();
+  })
+  .then(res => {
+    setTimeout(() => {
       mostrarResultadoControl(res);
-    },1200);
+    }, 800);
+  })
+  .catch(err => {
+    console.error(err);
+    // Si se queda azul, este cartel te va a decir EXACTAMENTE qué falló en el celular
+    document.getElementById("contenidoControl").innerHTML = `
+      <div style="text-align:center; margin-top:50px; color:#c1121f; padding:10px;">
+        <div style="font-size:50px;">❌</div>
+        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR EN LA SEGUNDA CONSULTA</div>
+        <p style="font-size:14px; color:#555; margin-top:10px;">${err.message}</p>
+      </div>
+    `;
   });
 }
 
@@ -689,29 +708,48 @@ function volverFormulario(){
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
   
-  // 1. Vaciamos el contenedor por completo antes de arrancar
-  document.getElementById("contenidoControl").innerHTML = "";
+  if(!patente) {
+    alert("Por favor, ingrese o escanee una patente primero.");
+    return;
+  }
   
-  // 2. Hacemos el cambio de pantallas con las clases estrictas
+  // Limpieza inicial estricta
+  document.getElementById("contenidoControl").innerHTML = "";
   document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
   document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
   
-  // 3. Inyectamos la animación de verificación
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">🚗</div>
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">VERIFICANDO PATENTE...</div>
      </div>`;
 
-  fetch(API_URL + "?accion=buscarVehiculo",{
-    method:"POST",
-    body: JSON.stringify({ patente:patente })
+  // Agregamos un timestamp para obligar al servidor a no usar caché vieja
+  const url = API_URL + "?accion=buscarVehiculo&_t=" + Date.now();
+
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({ patente: patente })
   })
-  .then(r=>r.json())
-  .then(res=>{
-    setTimeout(()=>{
+  .then(r => {
+    if(!r.ok) throw new Error("Error en la respuesta del servidor: " + r.status);
+    return r.json();
+  })
+  .then(res => {
+    setTimeout(() => {
       mostrarResultadoControl(res);
-    },1200);
+    }, 800);
+  })
+  .catch(err => {
+    console.error(err);
+    // Si se queda azul, este cartel te va a decir EXACTAMENTE qué falló en el celular
+    document.getElementById("contenidoControl").innerHTML = `
+      <div style="text-align:center; margin-top:50px; color:#c1121f; padding:10px;">
+        <div style="font-size:50px;">❌</div>
+        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR EN LA SEGUNDA CONSULTA</div>
+        <p style="font-size:14px; color:#555; margin-top:10px;">${err.message}</p>
+      </div>
+    `;
   });
 }
 
