@@ -1,4 +1,4 @@
-VERSION 1.1. <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <link rel="apple-touch-icon" href="https://res.cloudinary.com/dgrxc4otb/image/upload/v1779304717/Easy-Control/ICONO_ajusbo.jpg">
@@ -265,7 +265,7 @@ button,
   <label>CONTRASEÑA</label>
   <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
   <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
-  <label>Version 1.12 FUM:20-05-2026</label>
+  <label>Version 1.13 FUM:24-05-2026</label>
 </div>
 
 <div id="pantallaCarga" style="display: none; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: 100%; max-width: 300px; pointer-events: none;">
@@ -783,11 +783,13 @@ function mostrarResultadoControl(data){
   }
 }
 
+// CORRECCIÓN DEFINITIVA UNIFICADA DE RETORNO: Remueve clases y limpia estilos manuales
 function volverFormulario(){
-  document.getElementById("pantallaControl").hidden    = true;
+  document.getElementById("pantallaControl").classList.add("pantalla-oculta");
   document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
+  document.getElementById("pantallaFormulario").style.display = ""; 
+  limpiarTodoEfectivo();
 }
-
 function obtenerUbicacion(){
   const dni = document.getElementById("dni").value.trim();
   const ape = document.getElementById("apellido").value.trim();
