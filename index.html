@@ -718,6 +718,9 @@ function buscarVehiculo(){
 function mostrarResultadoControl(data){
   const box = document.getElementById("contenidoControl");
   
+  // Limpiamos el contenedor por seguridad antes de renderizar el nuevo resultado
+  box.innerHTML = "";
+  
   // Si no se encuentra en la base de datos (Control Negativo)
   if(!data.encontrado){
     box.innerHTML =
@@ -725,12 +728,12 @@ function mostrarResultadoControl(data){
     return;
   }
   
-  // Si se encuentra (Control Positivo), preparamos la foto si existe
+  // Si se encuentra (Control Positivo) prepamos la foto
   const fotoHTML = data.foto
     ? `<img src="${data.foto}" style="width:100%; border-radius:18px; margin-top:20px;">`
     : "";
 
-  // Estructura limpia para Vehículo
+  // Renderizado para Vehículo
   if(data.tipo === "vehiculo"){
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
@@ -741,7 +744,7 @@ function mostrarResultadoControl(data){
        ${fotoHTML}
        <div style="margin-top:20px; font-size:15px; font-weight:bold; color:#111827; white-space:pre-wrap; text-align:justify; line-height:1.4;">${data.motivos}</div>`;
   } 
-  // Estructura limpia para Persona
+  // Renderizado para Persona
   else {
     box.innerHTML =
       `<div style="text-align:center; font-size:24px; font-weight:900; margin-bottom:25px; color:#c1121f;">⚠CONTROL POSITIVO⚠</div>
