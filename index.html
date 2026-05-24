@@ -265,7 +265,7 @@ button,
   <label>CONTRASEÑA</label>
   <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
   <button class="btn-login" onclick="iniciarSesion()">🔐 INICIAR SESIÓN</button>
-  <label>Version 1.13 FUM:24-05-2026</label>
+  <label>Version 1.14 FUM:24-05-2026</label>
 </div>
 
 <div id="pantallaCarga" style="display: none; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: 100%; max-width: 300px; pointer-events: none;">
@@ -989,53 +989,40 @@ async function tomarFotoPatente() {
   canvas.height = video.videoHeight;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   
-  // Convertir a base64
-  const base64Image = canvas.toDataURL('image/jpeg', 0.5);
-  
-  // Cambiar pantalla a carga
+  const base64Image = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
+
   document.getElementById("pantallaScanner").style.display = "none";
   document.getElementById("pantallaCarga").style.display = "block";
-  document.querySelector("#pantallaCarga div:last-child").innerText = "Analizando con Gemini...";
+  document.querySelector("#pantallaCarga div:last-child").innerText = "Analizando patente...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ 
-        accion: "analizarPatente", 
-        image: base64Image 
-      })
+      body: JSON.stringify({ accion: "analizarPatente", image: base64Image })
     });
-    
     const data = await res.json();
     
-    // Apagar cámara
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
+
     if (video.srcObject) {
       video.srcObject.getTracks().forEach(track => track.stop());
     }
 
-    document.getElementById("pantallaCarga").style.display = "none";
-    document.getElementById("pantallaFormulario").style.display = "block";
-
     if(data.ok) {
-      // AQUÍ ESTÁ LA CORRECCIÓN: Asignamos el valor al input
-      const inputPatente = document.getElementById("patente");
-      inputPatente.value = data.patente;
-      
-      // Actualizamos validaciones
+      document.getElementById("patente").value = data.patente;
       document.getElementById("validacionPATENTE").value = "SI";
-      
-      // Opcional: auto-buscar al detectar
+      document.getElementById("validacionDNI").value = "NO";
       buscarVehiculo();
     } else {
-      alert("Error en lectura: " + (data.error || "No se pudo leer la patente"));
+      alert("No se pudo leer la patente: " + data.error);
+      document.getElementById("pantallaScanner").style.display = "block";
     }
-    
   } catch (e) {
     document.getElementById("pantallaCarga").style.display = "none";
     document.getElementById("pantallaFormulario").style.display = "block";
     alert("Error de conexión al enviar la foto.");
   }
-}
 }
 
 function cerrarScannerGenerico() {
