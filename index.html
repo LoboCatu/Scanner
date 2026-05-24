@@ -273,7 +273,7 @@ button,
     <div style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
 </div>
 
-<div id="pantallaFormulario" class="card" hidden>
+<div id="pantallaFormulario" class="card">
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -361,7 +361,7 @@ button,
   <canvas id="canvasPatente" style="display:none;"></canvas>
 </div>
 
-<div id="pantallaControl" class="card" hidden>
+<div id="pantallaControl" class="card pantalla-oculta">
   <div class="header">
     <img class="escudo" src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
     <div class="header-text">
@@ -639,8 +639,11 @@ function forzarMayusculas(input){
 
 function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
-  document.getElementById("pantallaFormulario").hidden = true;
-  document.getElementById("pantallaControl").hidden    = false;
+  
+  // CORRECCIÓN: Ocultar el formulario y mostrar el control usando la clase estricta
+  document.getElementById("pantallaFormulario").classList.add("pantalla-oculta");
+  document.getElementById("pantallaControl").classList.remove("pantalla-oculta");
+  
   document.getElementById("contenidoControl").innerHTML =
     `<div style="text-align:center; margin-top:90px;">
        <div style="font-size:70px; animation:pulse 1s infinite;">📄</div>
@@ -659,6 +662,11 @@ function buscarPersona(){
   });
 }
 
+function volverFormulario(){
+  // CORRECCIÓN: Apaga la pantalla de control y devuelve el formulario de forma limpia
+  document.getElementById("pantallaControl").classList.add("pantalla-oculta");
+  document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
+}
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
   document.getElementById("pantallaFormulario").hidden = true;
@@ -715,7 +723,7 @@ function mostrarResultadoControl(data){
 
 function volverFormulario(){
   document.getElementById("pantallaControl").hidden    = true;
-  document.getElementById("pantallaFormulario").hidden = false;
+  document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
 }
 
 function obtenerUbicacion(){
