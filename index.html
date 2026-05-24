@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+VERSION 1.1. <!DOCTYPE html>
 <html lang="es">
 <head>
 <link rel="apple-touch-icon" href="https://res.cloudinary.com/dgrxc4otb/image/upload/v1779304717/Easy-Control/ICONO_ajusbo.jpg">
@@ -652,7 +652,7 @@ function forzarMayusculas(input){
   else input.value = input.value.toUpperCase();
 }
 
-function buscarPersona(){
+    function buscarPersona(){
   const dni = document.getElementById("dni").value.trim();
   
   if(!dni) {
@@ -671,30 +671,23 @@ function buscarPersona(){
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">ANALIZANDO DNI...</div>
      </div>`;
 
-  // Agregamos un timestamp para obligar al servidor a no usar caché vieja
   const url = API_URL + "?accion=buscarPersona&_t=" + Date.now();
 
   fetch(url, {
     method: "POST",
     body: JSON.stringify({ dni: dni })
   })
-  .then(r => {
-    if(!r.ok) throw new Error("Error en la respuesta del servidor: " + r.status);
-    return r.json();
-  })
+  .then(r => r.json())
   .then(res => {
-    setTimeout(() => {
-      mostrarResultadoControl(res);
-    }, 800);
+    // CORRECCIÓN: Eliminamos el setTimeout. Se dibuja AL INSTANTE en cuanto llega la respuesta
+    mostrarResultadoControl(res);
   })
   .catch(err => {
     console.error(err);
-    // Si se queda azul, este cartel te va a decir EXACTAMENTE qué falló en el celular
     document.getElementById("contenidoControl").innerHTML = `
       <div style="text-align:center; margin-top:50px; color:#c1121f; padding:10px;">
         <div style="font-size:50px;">❌</div>
-        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR EN LA SEGUNDA CONSULTA</div>
-        <p style="font-size:14px; color:#555; margin-top:10px;">${err.message}</p>
+        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR DE CONEXIÓN</div>
       </div>
     `;
   });
@@ -705,6 +698,7 @@ function volverFormulario(){
   document.getElementById("pantallaControl").classList.add("pantalla-oculta");
   document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
 }
+
 function buscarVehiculo(){
   const patente = document.getElementById("patente").value.trim();
   
@@ -724,35 +718,29 @@ function buscarVehiculo(){
        <div style="margin-top:25px; font-size:28px; font-weight:900; color:#012b63;">VERIFICANDO PATENTE...</div>
      </div>`;
 
-  // Agregamos un timestamp para obligar al servidor a no usar caché vieja
   const url = API_URL + "?accion=buscarVehiculo&_t=" + Date.now();
 
   fetch(url, {
     method: "POST",
     body: JSON.stringify({ patente: patente })
   })
-  .then(r => {
-    if(!r.ok) throw new Error("Error en la respuesta del servidor: " + r.status);
-    return r.json();
-  })
+  .then(r => r.json())
   .then(res => {
-    setTimeout(() => {
-      mostrarResultadoControl(res);
-    }, 800);
+    // CORRECCIÓN: Eliminamos el setTimeout. Se dibuja AL INSTANTE en cuanto llega la respuesta
+    mostrarResultadoControl(res);
   })
   .catch(err => {
     console.error(err);
-    // Si se queda azul, este cartel te va a decir EXACTAMENTE qué falló en el celular
     document.getElementById("contenidoControl").innerHTML = `
       <div style="text-align:center; margin-top:50px; color:#c1121f; padding:10px;">
         <div style="font-size:50px;">❌</div>
-        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR EN LA SEGUNDA CONSULTA</div>
-        <p style="font-size:14px; color:#555; margin-top:10px;">${err.message}</p>
+        <div style="font-size:20px; font-weight:bold; margin-top:15px;">ERROR DE CONEXIÓN</div>
       </div>
     `;
   });
 }
 
+    
 function mostrarResultadoControl(data){
   const box = document.getElementById("contenidoControl");
   
