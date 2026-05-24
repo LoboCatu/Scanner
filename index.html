@@ -989,43 +989,53 @@ async function tomarFotoPatente() {
   canvas.height = video.videoHeight;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   
-  const base64Image = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-
+  // Convertir a base64
+  const base64Image = canvas.toDataURL('image/jpeg', 0.5);
+  
+  // Cambiar pantalla a carga
   document.getElementById("pantallaScanner").style.display = "none";
   document.getElementById("pantallaCarga").style.display = "block";
-  document.querySelector("#pantallaCarga div:last-child").innerText = "Analizando patente...";
+  document.querySelector("#pantallaCarga div:last-child").innerText = "Analizando con Gemini...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ accion: "analizarPatente", image: base64Image })
+      body: JSON.stringify({ 
+        accion: "analizarPatente", 
+        image: base64Image 
+      })
     });
+    
     const data = await res.json();
     
-    document.getElementById("pantallaCarga").style.display = "none";
-    document.getElementById("pantallaFormulario").style.display = "block";
-    
+    // Apagar cámara
     if (video.srcObject) {
       video.srcObject.getTracks().forEach(track => track.stop());
     }
 
+    document.getElementById("pantallaCarga").style.display = "none";
+    document.getElementById("pantallaFormulario").style.display = "block";
+
     if(data.ok) {
-      // AQUÍ SE ASIGNA EL RESULTADO AL TEXTBOX
-      document.getElementById("patente").value = data.patente; 
-      document.getElementById("validacionPATENTE").value = "SI";
-      document.getElementById("validacionDNI").value = "NO";
+      // AQUÍ ESTÁ LA CORRECCIÓN: Asignamos el valor al input
+      const inputPatente = document.getElementById("patente");
+      inputPatente.value = data.patente;
       
-      // Llamamos a la función de búsqueda automáticamente
-      buscarVehiculo(); 
+      // Actualizamos validaciones
+      document.getElementById("validacionPATENTE").value = "SI";
+      
+      // Opcional: auto-buscar al detectar
+      buscarVehiculo();
     } else {
-      alert("No se pudo leer la patente: " + data.error);
-      document.getElementById("pantallaScanner").style.display = "block";
+      alert("Error en lectura: " + (data.error || "No se pudo leer la patente"));
     }
+    
   } catch (e) {
     document.getElementById("pantallaCarga").style.display = "none";
     document.getElementById("pantallaFormulario").style.display = "block";
     alert("Error de conexión al enviar la foto.");
   }
+}
 }
 
 function cerrarScannerGenerico() {
