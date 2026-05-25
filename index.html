@@ -355,8 +355,17 @@ button,
 
   <div id="scannerStatus" style="text-align:center; font-size:14px; font-weight:700; margin-top:15px; color:white;">...</div>
 
-  <button id="btnCapturarPatente" class="btn-externo" style="background:#0ea85d; display:none; margin-top:15px;" onclick="tomarFotoPatente()">📸 CAPTURAR PATENTE</button>
-  <button class="btn-externo btn-clear" style="margin-top:10px;" onclick="cerrarScannerGenerico()">❌ CANCELAR ESCANEO</button>
+  <div style="display: flex; gap: 10px; margin-top: 15px;">
+    
+    <div style="flex: 1;">
+      <button id="btnCapturarPatente" class="btn-save" style="margin: 0; padding: 14px; width: 100%;" onclick="tomarFotoPatente()">📸 CAPTURAR</button>
+    </div>
+    
+    <div style="flex: 1;">
+      <button class="btn-clear" style="margin: 0; padding: 14px; width: 100%;" onclick="cerrarScannerGenerico()">⬅ VOLVER</button>
+    </div>
+    
+  </div>
   
   <canvas id="canvasPatente" style="display:none;"></canvas>
 </div>
@@ -1040,3 +1049,4 @@ function cerrarScannerGenerico() {
 </script>
 </body>
 </html>
+
