@@ -258,9 +258,20 @@ button,
     </div>
   </div>
   <label>OPERADOR</label>
-  <select id="desegnableUsuario" onchange="rellenarTextBoxUsuario()">
-    <option value="">⏳ Cargando usuarios...</option>
-  </select>
+
+<input 
+  list="listaUsuarios"
+  id="desegnableUsuario"
+  placeholder="Seleccione o escriba operador"
+  oninput="rellenarTextBoxUsuario()"
+  autocomplete="off"
+>
+
+<datalist id="listaUsuarios">
+</datalist>
+
+
+
   <input type="hidden" id="usuario">
   <label>CONTRASEÑA</label>
   <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
@@ -452,13 +463,14 @@ window.onload = async function(){
 };
 
 function construirSelectorUsuarios(lista){
-  const select = document.getElementById("desegnableUsuario");
-  select.innerHTML = '<option value="">-- Seleccionar --</option>';
+  const datalist = document.getElementById("listaUsuarios");
+
+  datalist.innerHTML = "";
+
   lista.forEach(function(u){
-    const opt = document.createElement("option");
-    opt.value = u;
-    opt.text  = u;
-    select.appendChild(opt);
+    const option = document.createElement("option");
+    option.value = u;
+    datalist.appendChild(option);
   });
 }
 
