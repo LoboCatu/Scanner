@@ -130,12 +130,12 @@ label{
 
 input,
 textarea,
-select {
+ {
   width: 100%;
   border: none;
   border-radius: 20px;
   padding: 16px 20px;
-  font-size: 16px;
+  font-size: 13px;
   background: #f0f2f5;
   color: #012b63;
   outline: none;
@@ -258,9 +258,9 @@ button,
     </div>
   </div>
   <label>OPERADOR</label>
-  <select id="desegnableUsuario" onchange="rellenarTextBoxUsuario()">
+  < id="desegnableUsuario" onchange="rellenarTextBoxUsuario()">
     <option value="">⏳ Cargando usuarios...</option>
-  </select>
+  </>
   <input type="hidden" id="usuario">
   <label>CONTRASEÑA</label>
   <input type="password" id="clave" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6">
@@ -290,13 +290,13 @@ button,
 
   <label>OPERATIVO</label>
 
-  <select id="desplegableOperativo">
+  < id="desplegableOperativo">
 
     <option value="">
       ⏳ Cargando operativos...
     </option>
 
-  </select>
+  </>
 
   <button
     class="btn-login"
