@@ -259,16 +259,33 @@ button,
   </div>
   <label>OPERADOR</label>
 
-<input 
-  list="listaUsuarios"
+<div style="position:relative;">
+
+<input
+  type="text"
   id="desegnableUsuario"
   placeholder="Seleccione o escriba operador"
-  oninput="rellenarTextBoxUsuario()"
   autocomplete="off"
+  oninput="filtrarUsuarios()"
 >
 
-<datalist id="listaUsuarios">
-</datalist>
+<div id="listaFiltrada" style="
+  position:absolute;
+  top:100%;
+  left:0;
+  width:100%;
+  background:white;
+  border-radius:15px;
+  margin-top:5px;
+  overflow:hidden;
+  max-height:220px;
+  overflow-y:auto;
+  z-index:9999;
+  display:none;
+  box-shadow:0 8px 20px rgba(0,0,0,0.25);
+"></div>
+
+</div>
 
 
 
@@ -444,6 +461,8 @@ let latitudActual  = "";
 let longitudActual = "";
 let idRelojGPS     = null;
 
+let listaUsuariosGlobal = [];
+
 
 let scanner       = null;
 let scannerActivo = false;
@@ -463,15 +482,7 @@ window.onload = async function(){
 };
 
 function construirSelectorUsuarios(lista){
-  const datalist = document.getElementById("listaUsuarios");
-
-  datalist.innerHTML = "";
-
-  lista.forEach(function(u){
-    const option = document.createElement("option");
-    option.value = u;
-    datalist.appendChild(option);
-  });
+  listaUsuariosGlobal = lista;
 }
 
 function rellenarTextBoxUsuario(){
@@ -1196,6 +1207,117 @@ function cerrarScannerGenerico() {
   document.getElementById("pantallaScanner").style.display = "none";
   document.getElementById("pantallaFormulario").style.display = "block";
 }
+
+function filtrarUsuarios(){
+
+  const input  = document.getElementById("desegnableUsuario");
+  const lista  = document.getElementById("listaFiltrada");
+
+  const texto = input.value
+    .toLowerCase()
+    .trim();
+
+  lista.innerHTML = "";
+
+  document.getElementById("usuario").value = input.value;
+
+  if(texto.length === 0){
+
+    lista.style.display = "none";
+    return;
+  }
+
+  const coincidencias = listaUsuariosGlobal
+    .filter(u =>
+      u.toLowerCase().includes(texto)
+    )
+    .slice(0,6);
+
+  if(coincidencias.length === 0){
+
+    lista.style.display = "none";
+    return;
+  }
+
+  coincidencias.forEach(usuario => {
+
+    const item = document.createElement("div");
+
+    item.innerHTML = usuario.replace(
+      new RegExp(texto, "ig"),
+      match => `<b>${match}</b>`
+    );
+
+    item.style.padding = "15px 18px";
+    item.style.cursor = "pointer";
+    item.style.color = "#012b63";
+    item.style.fontWeight = "700";
+    item.style.fontSize = "15px";
+    item.style.background = "white";
+    item.style.borderBottom = "1px solid #e5e7eb";
+
+    item.onclick = function(){
+
+      input.value = usuario;
+
+      document.getElementById("usuario").value = usuario;
+
+      lista.style.display = "none";
+
+      document.getElementById("clave").focus();
+    };
+
+    item.onmouseover = () => {
+      item.style.background = "#edf4ff";
+    };
+
+    item.onmouseout = () => {
+      item.style.background = "white";
+    };
+
+    lista.appendChild(item);
+  });
+
+  lista.style.display = "block";
+}
+
+
+document.addEventListener("click", function(e){
+
+  const input = document.getElementById("desegnableUsuario");
+  const lista = document.getElementById("listaFiltrada");
+
+  if(
+    e.target !== input &&
+    !lista.contains(e.target)
+  ){
+    lista.style.display = "none";
+  }
+
+});
+
+
+document
+.getElementById("desegnableUsuario")
+.addEventListener("keydown", function(e){
+
+  const lista =
+    document.getElementById("listaFiltrada");
+
+  const primerItem =
+    lista.querySelector("div");
+
+  if(e.key === "Enter" && primerItem){
+
+    e.preventDefault();
+
+    primerItem.click();
+  }
+});
+
+document
+.getElementById("desegnableUsuario")
+.addEventListener("focus", filtrarUsuarios);
 
 </script>
 </body>
