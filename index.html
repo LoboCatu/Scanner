@@ -268,6 +268,46 @@ button,
   <label>Version 1.14 FUM:24-05-2026</label>
 </div>
 
+
+<div id="pantallaOperativos" class="card pantalla-oculta">
+
+  <div class="header">
+
+    <img class="escudo"
+      src="https://res.cloudinary.com/dgrxc4otb/image/upload/Easy-Control/ESCUDO4_fpn3hb.png">
+
+    <div class="header-text">
+
+      <h2>OPERATIVO</h2>
+
+      <p>SELECCIÓN DE DESTINO</p>
+
+      <div class="barra"></div>
+
+    </div>
+
+  </div>
+
+  <label>OPERATIVO</label>
+
+  <select id="desplegableOperativo">
+
+    <option value="">
+      ⏳ Cargando operativos...
+    </option>
+
+  </select>
+
+  <button
+    class="btn-login"
+    onclick="confirmarOperativo()">
+
+    ✅ CONTINUAR
+
+  </button>
+
+</div>
+
 <div id="pantallaCarga" style="display: none; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: 100%; max-width: 300px; pointer-events: none;">
     <div style="display: inline-block; font-size: 50px; animation: rotation 2s infinite linear; margin-bottom: 15px; width: 60px; height: 60px; line-height: 60px; text-align: center;">⏳</div>
     <div style="font-size: 18px; font-weight: bold; color: white;">Validando credenciales...</div>
@@ -388,9 +428,11 @@ button,
 const API_URL = "https://script.google.com/macros/s/AKfycbyAXFeZR8J6XdVgYwPWn8CLkjMYWFRQNNcT3q9J-jRzAVNRHAlWVj0r8vyE4QGWEls/exec";
 
 let usuarioActivo  = "";
+let operativoActivo = "";
 let latitudActual  = "";
 let longitudActual = "";
 let idRelojGPS     = null;
+
 
 let scanner       = null;
 let scannerActivo = false;
@@ -460,13 +502,19 @@ async function iniciarSesion(){
       document.getElementById("nombreOperador").innerText = usuarioActivo;
       
       // 2. Dejamos el reloj de arena un momento y hacemos la transición limpia al formulario
-      setTimeout(() => {
-        pantallaCarga.style.display = "none";
-        // CORRECCIÓN: Mostramos el formulario quitando la clase estricta
-        document.getElementById("pantallaFormulario").classList.remove("pantalla-oculta");
-        
-        iniciarRastreoGPSContinuo(); 
-      }, 1000); // 1 segundo de retraso con el reloj de arena para que sea fluido
+setTimeout(async () => {
+
+  pantallaCarga.style.display = "none";
+
+  await cargarOperativos();
+
+  document
+    .getElementById("pantallaOperativos")
+    .classList.remove("pantalla-oculta");
+
+  iniciarRastreoGPSContinuo();
+
+}, 1000);; // 1 segundo de retraso con el reloj de arena para que sea fluido
       
     } else {
       // Si la clave falla, apagamos carga y volvemos a mostrar el Login quitando la clase
@@ -482,6 +530,96 @@ async function iniciarSesion(){
     console.error(e);
   }
 }
+
+
+async function cargarOperativos(){
+
+  try {
+
+    const res = await fetch(API_URL, {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        accion: "operativos",
+        usuario: usuarioActivo
+
+      })
+
+    });
+
+    const data = await res.json();
+
+    const select =
+      document.getElementById("desplegableOperativo");
+
+    select.innerHTML = "";
+
+    if(
+      !data.ok ||
+      data.operativos.length === 0
+    ){
+
+      select.innerHTML =
+        '<option value="">SIN OPERATIVOS DISPONIBLES</option>';
+
+      return;
+
+    }
+
+    select.innerHTML =
+      '<option value="">-- Seleccionar --</option>';
+
+    data.operativos.forEach(function(op){
+
+      const option =
+        document.createElement("option");
+
+      option.value = op;
+      option.text  = op;
+
+      select.appendChild(option);
+
+    });
+
+  } catch(e){
+
+    console.error(e);
+
+    alert("Error cargando operativos");
+
+  }
+
+}
+
+
+function confirmarOperativo(){
+
+  const operativo =
+    document.getElementById("desplegableOperativo").value;
+
+  if(!operativo){
+
+    alert("Seleccione un operativo");
+
+    return;
+  }
+
+  operativoActivo = operativo;
+
+  document
+    .getElementById("pantallaOperativos")
+    .classList.add("pantalla-oculta");
+
+  document
+    .getElementById("pantallaFormulario")
+    .classList.remove("pantalla-oculta");
+
+}
+
+
+
 function iniciarRastreoGPSContinuo() {
   if (!navigator.geolocation) {
     console.warn("El navegador o dispositivo no soporta Geolocalización.");
@@ -865,6 +1003,7 @@ async function enviarAlServer(){
   const data = {
     accion: "guardar", 
     usuario: usuarioActivo,
+    operativo: operativoActivo,
     dni: document.getElementById("dni").value,
     apellido: document.getElementById("apellido").value,
     nombre: document.getElementById("nombre").value,
@@ -1049,4 +1188,3 @@ function cerrarScannerGenerico() {
 </script>
 </body>
 </html>
-
