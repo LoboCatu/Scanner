@@ -676,7 +676,7 @@ function abrirScannerDNI(){
   ["dni","apellido","nombre","fechaNacimiento","patente","observacion"].forEach(id => { document.getElementById(id).value = ""; });
   
   document.getElementById("validacionDNI").value = "SI";
-  document.getElementById("validacionPATENTE").value = "NO";
+
 
   document.getElementById("tituloScanner").innerText = "📸 LECTOR DNI";
   document.getElementById("scannerStatus").innerText = "Apunte al código del DNI...";
@@ -799,7 +799,6 @@ function procesarTexto(texto){
 
 function ingresarDniManual(){
   document.getElementById("validacionDNI").value = "SI";
-  document.getElementById("validacionPATENTE").value = "NO";
 
   if(document.getElementById("dni").value.trim() !== "") buscarPersona();
   else document.getElementById("dni").focus();
@@ -807,7 +806,7 @@ function ingresarDniManual(){
 
 function ingresarPatenteManual(){
   document.getElementById("validacionPATENTE").value = "SI";
-  document.getElementById("validacionDNI").value = "NO";
+
 
   if(document.getElementById("patente").value.trim() !== "") buscarVehiculo();
   else document.getElementById("patente").focus();
@@ -1183,7 +1182,7 @@ async function tomarFotoPatente() {
     if(data.ok) {
       document.getElementById("patente").value = data.patente;
       document.getElementById("validacionPATENTE").value = "SI";
-      document.getElementById("validacionDNI").value = "NO";
+      
       buscarVehiculo();
     } else {
       alert("No se pudo leer la patente: " + data.error);
